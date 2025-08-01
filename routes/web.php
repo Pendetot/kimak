@@ -262,32 +262,63 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::Keuangan->value])->prefix('
     Route::post('/surat-peringatan', [SuratPeringatanController::class, 'store'])->name('surat-peringatan.store');
 });
 
-// Karyawan Routes
-Route::middleware(['auth', 'check.role:' . RoleEnum::Karyawan->value])->prefix('karyawan')->name('karyawan.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('karyawan.dashboard');
-    })->name('dashboard');
-    Route::resource('kpis', App\Http\Controllers\Karyawan\KPIKaryawanController::class)->names([
-        'index' => 'kpis',
-        'create' => 'kpis.create',
-        'store' => 'kpis.store',
-        'show' => 'kpis.show',
-        'edit' => 'kpis.edit',
-        'update' => 'kpis.update',
-        'destroy' => 'kpis.destroy',
-    ]);
-    Route::resource('absensis', App\Http\Controllers\Karyawan\AbsensiController::class)->names([
-        'index' => 'absensis',
-        'create' => 'absensis.create',
-        'store' => 'absensis.store',
-        'show' => 'absensis.show',
-        'edit' => 'absensis.edit',
-        'update' => 'absensis.update',
-        'destroy' => 'absensis.destroy',
-    ]);
-    Route::resource('lap-dokumens', App\Http\Controllers\Karyawan\LapDokumenController::class)->names([
-        'index' => 'lap-dokumens',
-        'create' => 'lap-dokumens.create',
+// Karyawan Authentication Routes
+Route::prefix('karyawan')->name('karyawan.')->group(function () {
+    Route::middleware('guest:karyawan')->group(function () {
+        Route::get('/login', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'login']);
+    });
+    
+    Route::middleware('auth:karyawan')->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [App\Http\Controllers\Karyawan\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/widget-data', [App\Http\Controllers\Karyawan\DashboardController::class, 'widgetData'])->name('dashboard.widget-data');
+        
+        // Authentication & Profile
+        Route::post('/logout', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'logout'])->name('logout');
+        Route::get('/profile', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'showProfile'])->name('profile.show');
+        Route::put('/profile', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/change-password', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'showChangePasswordForm'])->name('password.change');
+        Route::put('/change-password', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'changePassword'])->name('password.update');
+        
+        // Absensi Management
+        Route::prefix('absensi')->name('absensi.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Karyawan\AbsensiController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\Karyawan\AbsensiController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\Karyawan\AbsensiController::class, 'store'])->name('store');
+            Route::get('/{absensi}', [App\Http\Controllers\Karyawan\AbsensiController::class, 'show'])->name('show');
+            Route::get('/{absensi}/edit', [App\Http\Controllers\Karyawan\AbsensiController::class, 'edit'])->name('edit');
+            Route::put('/{absensi}', [App\Http\Controllers\Karyawan\AbsensiController::class, 'update'])->name('update');
+            Route::post('/check-in', [App\Http\Controllers\Karyawan\AbsensiController::class, 'checkIn'])->name('check-in');
+            Route::post('/check-out', [App\Http\Controllers\Karyawan\AbsensiController::class, 'checkOut'])->name('check-out');
+            Route::get('/statistics', [App\Http\Controllers\Karyawan\AbsensiController::class, 'statistics'])->name('statistics');
+        });
+        
+        // KPI Management
+        Route::prefix('kpi')->name('kpi.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Karyawan\KPIController::class, 'index'])->name('index');
+            Route::get('/{kpi}', [App\Http\Controllers\Karyawan\KPIController::class, 'show'])->name('show');
+            Route::get('/statistics', [App\Http\Controllers\Karyawan\KPIController::class, 'statistics'])->name('statistics');
+            Route::get('/history', [App\Http\Controllers\Karyawan\KPIController::class, 'history'])->name('history');
+            Route::get('/current-summary', [App\Http\Controllers\Karyawan\KPIController::class, 'currentSummary'])->name('current-summary');
+            Route::get('/ranking', [App\Http\Controllers\Karyawan\KPIController::class, 'ranking'])->name('ranking');
+            Route::get('/suggestions', [App\Http\Controllers\Karyawan\KPIController::class, 'suggestions'])->name('suggestions');
+        });
+        
+        // Cuti Management
+        Route::resource('cuti', App\Http\Controllers\Karyawan\CutiController::class)->except(['destroy']);
+        
+        // Pengajuan Barang
+        Route::resource('pengajuan-barang', App\Http\Controllers\Karyawan\PengajuanBarangController::class)->except(['destroy']);
+        
+        // Dokumen Management
+        Route::resource('dokumen', App\Http\Controllers\Karyawan\LapDokumenController::class)->names([
+            'index' => 'dokumen.index',
+            'create' => 'dokumen.create',
+            'store' => 'dokumen.store',
+            'show' => 'dokumen.show',
+            'edit' => 'dokumen.edit',
+            'update' => 'dokumen.update',
         'store' => 'lap-dokumens.store',
         'show' => 'lap-dokumens.show',
         'edit' => 'lap-dokumens.edit',

@@ -48,7 +48,42 @@ Route::prefix('keuangan')->group(function () {
 });
 
 Route::prefix('karyawan')->group(function () {
-    Route::post('/auth/login', [LoginController::class, 'login']);
+    // Authentication
+    Route::post('/auth/login', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'apiLogin']);
+    
+    Route::middleware('auth:sanctum')->group(function () {
+        // Auth routes
+        Route::post('/auth/logout', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'apiLogout']);
+        Route::get('/auth/me', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'me']);
+        Route::put('/auth/change-password', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'apiChangePassword']);
+        Route::put('/auth/profile', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'apiUpdateProfile']);
+        
+        // Dashboard
+        Route::get('/dashboard', [App\Http\Controllers\Karyawan\DashboardController::class, 'apiDashboard']);
+        Route::get('/dashboard/widget-data', [App\Http\Controllers\Karyawan\DashboardController::class, 'widgetData']);
+        
+        // Absensi
+        Route::prefix('absensi')->group(function () {
+            Route::get('/', [App\Http\Controllers\Karyawan\AbsensiController::class, 'index']);
+            Route::post('/', [App\Http\Controllers\Karyawan\AbsensiController::class, 'store']);
+            Route::get('/statistics', [App\Http\Controllers\Karyawan\AbsensiController::class, 'statistics']);
+            Route::post('/check-in', [App\Http\Controllers\Karyawan\AbsensiController::class, 'checkIn']);
+            Route::post('/check-out', [App\Http\Controllers\Karyawan\AbsensiController::class, 'checkOut']);
+            Route::get('/{absensi}', [App\Http\Controllers\Karyawan\AbsensiController::class, 'show']);
+            Route::put('/{absensi}', [App\Http\Controllers\Karyawan\AbsensiController::class, 'update']);
+        });
+        
+        // KPI
+        Route::prefix('kpi')->group(function () {
+            Route::get('/', [App\Http\Controllers\Karyawan\KPIController::class, 'index']);
+            Route::get('/statistics', [App\Http\Controllers\Karyawan\KPIController::class, 'statistics']);
+            Route::get('/history', [App\Http\Controllers\Karyawan\KPIController::class, 'history']);
+            Route::get('/current-summary', [App\Http\Controllers\Karyawan\KPIController::class, 'currentSummary']);
+            Route::get('/ranking', [App\Http\Controllers\Karyawan\KPIController::class, 'ranking']);
+            Route::get('/suggestions', [App\Http\Controllers\Karyawan\KPIController::class, 'suggestions']);
+            Route::get('/{kpi}', [App\Http\Controllers\Karyawan\KPIController::class, 'show']);
+        });
+    });
 });
 
 Route::prefix('logistik')->group(function () {
