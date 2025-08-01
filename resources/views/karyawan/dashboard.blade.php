@@ -2,347 +2,48 @@
 
 @section('title', 'Dashboard Karyawan')
 
-@push('css')
-<style>
-    .stat-card {
-        border-radius: 12px;
-        transition: transform 0.2s ease-in-out;
-    }
-    .stat-card:hover {
-        transform: translateY(-2px);
-    }
-    .quick-action-btn {
-        border-radius: 8px;
-        padding: 12px;
-        text-decoration: none;
-        display: block;
-        text-align: center;
-        transition: all 0.2s ease-in-out;
-    }
-    .quick-action-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .activity-item {
-        border-left: 3px solid transparent;
-        padding-left: 15px;
-        margin-bottom: 15px;
-    }
-    .activity-item.success { border-left-color: #28a745; }
-    .activity-item.warning { border-left-color: #ffc107; }
-    .activity-item.danger { border-left-color: #dc3545; }
-    .activity-item.info { border-left-color: #17a2b8; }
-    .activity-item.primary { border-left-color: #007bff; }
-    
-    .notification-alert {
-        border-radius: 8px;
-        border: none;
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-    
-    .contract-warning {
-        background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%);
-        color: white;
-    }
-    
-    .debt-warning {
-        background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
-        color: white;
-    }
-</style>
-@endpush
+@section('breadcrumb-item')
+<li class="breadcrumb-item"><a href="{{ route('karyawan.dashboard') }}">Dashboard</a></li>
+<li class="breadcrumb-item active" aria-current="page">Overview</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h4 class="m-b-10">Selamat Datang, {{ $karyawan->display_name }}!</h4>
-                            </div>
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item">
-                                    <a href="{{ route('karyawan.dashboard') }}">
-                                        <i class="fas fa-home"></i> Dashboard
-                                    </a>
-                                </li>
-                                <li class="breadcrumb-item active" aria-current="page">Overview</li>
-                            </ul>
+<!-- [ Main Content ] start -->
+<div class="row">
+    <!-- Profile Card -->
+    <div class="col-md-4 col-sm-12">
+        <div class="card">
+            <div class="card-body position-relative">
+                <div class="text-center">
+                    <div class="chat-avtar d-inline-flex mx-auto">
+                        <img class="rounded-circle img-fluid wid-90 img-thumbnail" 
+                             src="{{ $karyawan->getPhotoUrl() }}" alt="User image">
+                    </div>
+                    <h5 class="mb-0">{{ $karyawan->display_name }}</h5>
+                    <p class="text-muted text-sm">{{ $karyawan->jabatan }}</p>
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <h5 class="mb-0">{{ $absensiStats['hadir'] }}</h5>
+                            <small class="text-muted">Hadir</small>
+                        </div>
+                        <div class="col-4">
+                            <h5 class="mb-0">{{ $latestKPI ? $latestKPI->nilai_kpi : '-' }}</h5>
+                            <small class="text-muted">KPI</small>
+                        </div>
+                        <div class="col-4">
+                            <h5 class="mb-0">{{ $karyawan->work_duration }}</h5>
+                            <small class="text-muted">Masa Kerja</small>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notifications & Alerts -->
-    @if($contractInfo && $contractInfo['is_expiring_soon'])
-        <div class="row mb-3">
-            <div class="col-12">
-                <div class="alert contract-warning notification-alert">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
-                        <div>
-                            <h6 class="mb-1">Kontrak Akan Berakhir!</h6>
-                            <p class="mb-0">
-                                Kontrak kerja Anda akan berakhir pada {{ $contractInfo['end_date']->format('d M Y') }} 
-                                ({{ $contractInfo['days_until_expiry'] }} hari lagi). Silakan hubungi HRD untuk perpanjangan.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    @if($activeSP > 0)
-        <div class="row mb-3">
-            <div class="col-12">
-                <div class="alert alert-danger notification-alert">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-circle fa-2x me-3"></i>
-                        <div>
-                            <h6 class="mb-1">Surat Peringatan Aktif</h6>
-                            <p class="mb-0">Anda memiliki {{ $activeSP }} surat peringatan yang masih aktif. Pastikan untuk mematuhi aturan perusahaan.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    @if($activeHutang > 0)
-        <div class="row mb-3">
-            <div class="col-12">
-                <div class="alert debt-warning notification-alert">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-credit-card fa-2x me-3"></i>
-                        <div>
-                            <h6 class="mb-1">Hutang Aktif</h6>
-                            <p class="mb-0">Anda memiliki hutang sebesar Rp {{ number_format($activeHutang, 0, ',', '.') }}. Pastikan untuk melakukan pembayaran tepat waktu.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 col-sm-6">
-            <div class="card stat-card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-calendar-check fa-2x opacity-75"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-white-50 mb-1">Kehadiran Bulan Ini</h6>
-                            <h4 class="mb-0">{{ $absensiStats['hadir'] }}/{{ $absensiStats['total'] }} Hari</h4>
-                            <small class="text-white-50">
-                                @if($absensiStats['total'] > 0)
-                                    {{ round(($absensiStats['hadir'] / $absensiStats['total']) * 100, 1) }}% Kehadiran
-                                @else
-                                    Belum ada data
-                                @endif
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3 col-sm-6">
-            <div class="card stat-card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-chart-line fa-2x opacity-75"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-white-50 mb-1">KPI Terakhir</h6>
-                            <h4 class="mb-0">
-                                @if($latestKPI)
-                                    {{ $latestKPI->nilai_kpi }}
-                                @else
-                                    -
-                                @endif
-                            </h4>
-                            <small class="text-white-50">
-                                @if($latestKPI)
-                                    {{ $latestKPI->periode->format('M Y') }}
-                                @else
-                                    Belum ada evaluasi
-                                @endif
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3 col-sm-6">
-            <div class="card stat-card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-clock fa-2x opacity-75"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-white-50 mb-1">Cuti Pending</h6>
-                            <h4 class="mb-0">{{ $pendingCuti }}</h4>
-                            <small class="text-white-50">Pengajuan menunggu approval</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3 col-sm-6">
-            <div class="card stat-card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-user-clock fa-2x opacity-75"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-white-50 mb-1">Masa Kerja</h6>
-                            <h4 class="mb-0">{{ $karyawan->work_duration }}</h4>
-                            <small class="text-white-50">Sejak {{ $karyawan->tanggal_masuk->format('M Y') }}</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Today's Attendance & Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-calendar-day me-2"></i>
-                        Absensi Hari Ini - {{ now()->format('d M Y') }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    @if($todayAbsensi)
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-success bg-opacity-10 rounded-circle p-3 me-3">
-                                        <i class="fas fa-sign-in-alt text-success fa-lg"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Jam Masuk</h6>
-                                        <span class="text-muted">
-                                            @if($todayAbsensi->jam_masuk)
-                                                {{ $todayAbsensi->jam_masuk->format('H:i') }}
-                                                @if($todayAbsensi->isLate())
-                                                    <span class="badge bg-warning ms-1">Terlambat</span>
-                                                @endif
-                                            @else
-                                                <span class="text-danger">Belum check-in</span>
-                                            @endif
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-danger bg-opacity-10 rounded-circle p-3 me-3">
-                                        <i class="fas fa-sign-out-alt text-danger fa-lg"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Jam Keluar</h6>
-                                        <span class="text-muted">
-                                            @if($todayAbsensi->jam_keluar)
-                                                {{ $todayAbsensi->jam_keluar->format('H:i') }}
-                                            @else
-                                                <span class="text-warning">Belum check-out</span>
-                                            @endif
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        @if($todayAbsensi->jam_masuk && $todayAbsensi->jam_keluar)
-                            <div class="alert alert-info">
-                                <i class="fas fa-clock me-2"></i>
-                                Total jam kerja: {{ $todayAbsensi->getWorkingHours() }} jam
-                            </div>
-                        @endif
-                    @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                            <h6 class="text-muted">Belum ada absensi hari ini</h6>
-                            <p class="text-muted">Silakan lakukan check-in untuk memulai hari kerja</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-bolt me-2"></i>
-                        Quick Actions
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-2">
-                        @if(!$todayAbsensi || !$todayAbsensi->jam_masuk)
-                            <div class="col-6">
-                                <a href="#" class="quick-action-btn bg-success bg-opacity-10 text-success" onclick="checkIn()">
-                                    <i class="fas fa-sign-in-alt fa-lg mb-2"></i>
-                                    <br><small>Check In</small>
-                                </a>
-                            </div>
-                        @endif
-
-                        @if($todayAbsensi && $todayAbsensi->jam_masuk && !$todayAbsensi->jam_keluar)
-                            <div class="col-6">
-                                <a href="#" class="quick-action-btn bg-danger bg-opacity-10 text-danger" onclick="checkOut()">
-                                    <i class="fas fa-sign-out-alt fa-lg mb-2"></i>
-                                    <br><small>Check Out</small>
-                                </a>
-                            </div>
-                        @endif
-
+                    <div class="row g-2 mt-3">
                         <div class="col-6">
-                            <a href="{{ route('karyawan.absensi.index') }}" class="quick-action-btn bg-primary bg-opacity-10 text-primary">
-                                <i class="fas fa-calendar-check fa-lg mb-2"></i>
-                                <br><small>Absensi</small>
+                            <a href="{{ route('karyawan.profile.show') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="feather icon-edit"></i> Profile
                             </a>
                         </div>
-
                         <div class="col-6">
-                            <a href="{{ route('karyawan.kpi.index') }}" class="quick-action-btn bg-info bg-opacity-10 text-info">
-                                <i class="fas fa-chart-line fa-lg mb-2"></i>
-                                <br><small>KPI</small>
-                            </a>
-                        </div>
-
-                        <div class="col-6">
-                            <a href="{{ route('karyawan.cuti.create') }}" class="quick-action-btn bg-warning bg-opacity-10 text-warning">
-                                <i class="fas fa-calendar-plus fa-lg mb-2"></i>
-                                <br><small>Ajukan Cuti</small>
-                            </a>
-                        </div>
-
-                        <div class="col-6">
-                            <a href="{{ route('karyawan.pengajuan-barang.create') }}" class="quick-action-btn bg-secondary bg-opacity-10 text-secondary">
-                                <i class="fas fa-box fa-lg mb-2"></i>
-                                <br><small>Pengajuan</small>
+                            <a href="{{ route('karyawan.absensi.index') }}" class="btn btn-primary btn-sm">
+                                <i class="feather icon-calendar"></i> Absensi
                             </a>
                         </div>
                     </div>
@@ -351,109 +52,283 @@
         </div>
     </div>
 
-    <!-- Recent Activities & Information -->
+    <!-- Stats Cards -->
+    <div class="col-md-8 col-sm-12">
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                <div class="card bg-primary-dark">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h3 class="text-white">{{ $absensiStats['hadir'] }}/{{ $absensiStats['total'] }}</h3>
+                                <h6 class="text-white m-b-0">Kehadiran Bulan Ini</h6>
+                            </div>
+                            <div class="col-auto">
+                                <i class="feather icon-calendar text-white f-28"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <div class="card bg-success-dark">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h3 class="text-white">{{ $latestKPI ? $latestKPI->nilai_kpi : 0 }}</h3>
+                                <h6 class="text-white m-b-0">KPI Terakhir</h6>
+                            </div>
+                            <div class="col-auto">
+                                <i class="feather icon-trending-up text-white f-28"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <div class="card bg-warning-dark">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h3 class="text-white">{{ $pendingCuti }}</h3>
+                                <h6 class="text-white m-b-0">Cuti Pending</h6>
+                            </div>
+                            <div class="col-auto">
+                                <i class="feather icon-clock text-white f-28"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <div class="card bg-info-dark">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h3 class="text-white">{{ $recentPengajuan->count() }}</h3>
+                                <h6 class="text-white m-b-0">Pengajuan Barang</h6>
+                            </div>
+                            <div class="col-auto">
+                                <i class="feather icon-package text-white f-28"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alerts Section -->
+@if($contractInfo && $contractInfo['is_expiring_soon'])
     <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-history me-2"></i>
-                        Pengajuan Barang Terbaru
-                    </h5>
-                </div>
-                <div class="card-body">
-                    @if($recentPengajuan->count() > 0)
-                        @foreach($recentPengajuan as $pengajuan)
-                            <div class="activity-item {{ $pengajuan->getStatusColor() }}">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-1">{{ $pengajuan->nama_barang }}</h6>
-                                        <p class="text-muted mb-0">
-                                            <small>
-                                                {{ $pengajuan->spesifikasi ?? 'Tidak ada spesifikasi' }} - 
-                                                Qty: {{ $pengajuan->jumlah }}
-                                            </small>
-                                        </p>
-                                        <small class="text-muted">{{ $pengajuan->created_at->diffForHumans() }}</small>
-                                    </div>
-                                    <span class="badge bg-{{ $pengajuan->getStatusColor() }}">
-                                        {{ $pengajuan->status->label() }}
+        <div class="col-12">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>Perhatian!</strong> Kontrak kerja Anda akan berakhir pada {{ $contractInfo['end_date']->format('d M Y') }} 
+                ({{ $contractInfo['days_until_expiry'] }} hari lagi). Silakan hubungi HRD untuk perpanjangan.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+@endif
+
+@if($activeSP > 0)
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Peringatan!</strong> Anda memiliki {{ $activeSP }} surat peringatan yang masih aktif. 
+                Pastikan untuk mematuhi aturan perusahaan.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+@endif
+
+@if($activeHutang > 0)
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <strong>Info!</strong> Anda memiliki hutang sebesar Rp {{ number_format($activeHutang, 0, ',', '.') }}. 
+                Pastikan untuk melakukan pembayaran tepat waktu.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+@endif
+
+<!-- Quick Actions & Today's Attendance -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Absensi Hari Ini - {{ now()->format('d M Y') }}</h5>
+            </div>
+            <div class="card-body">
+                @if($todayAbsensi)
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avtar avtar-s bg-light-success me-3">
+                                    <i class="feather icon-log-in"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Jam Masuk</h6>
+                                    <span class="text-muted">
+                                        @if($todayAbsensi->jam_masuk)
+                                            {{ $todayAbsensi->jam_masuk->format('H:i') }}
+                                            @if($todayAbsensi->isLate())
+                                                <span class="badge bg-warning ms-1">Terlambat</span>
+                                            @endif
+                                        @else
+                                            <span class="text-danger">Belum check-in</span>
+                                        @endif
                                     </span>
                                 </div>
                             </div>
-                        @endforeach
-                        <div class="text-center mt-3">
-                            <a href="{{ route('karyawan.pengajuan-barang.index') }}" class="btn btn-outline-primary btn-sm">
-                                Lihat Semua Pengajuan
-                            </a>
                         </div>
-                    @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                            <h6 class="text-muted">Belum ada pengajuan barang</h6>
-                            <a href="{{ route('karyawan.pengajuan-barang.create') }}" class="btn btn-primary btn-sm">
-                                Buat Pengajuan Baru
-                            </a>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avtar avtar-s bg-light-danger me-3">
+                                    <i class="feather icon-log-out"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Jam Keluar</h6>
+                                    <span class="text-muted">
+                                        @if($todayAbsensi->jam_keluar)
+                                            {{ $todayAbsensi->jam_keluar->format('H:i') }}
+                                        @else
+                                            <span class="text-warning">Belum check-out</span>
+                                        @endif
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @if($todayAbsensi->jam_masuk && $todayAbsensi->jam_keluar)
+                        <div class="alert alert-success">
+                            <i class="feather icon-clock me-2"></i>
+                            Total jam kerja: {{ $todayAbsensi->getWorkingHours() }} jam
                         </div>
                     @endif
+                @else
+                    <div class="text-center py-4">
+                        <i class="feather icon-calendar f-40 text-muted mb-3"></i>
+                        <h6 class="text-muted">Belum ada absensi hari ini</h6>
+                        <p class="text-muted">Silakan lakukan check-in untuk memulai hari kerja</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    @if(!$todayAbsensi || !$todayAbsensi->jam_masuk)
+                        <div class="col-6">
+                            <div class="d-grid">
+                                <button class="btn btn-success btn-sm" onclick="checkIn()">
+                                    <i class="feather icon-log-in"></i><br>Check In
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($todayAbsensi && $todayAbsensi->jam_masuk && !$todayAbsensi->jam_keluar)
+                        <div class="col-6">
+                            <div class="d-grid">
+                                <button class="btn btn-danger btn-sm" onclick="checkOut()">
+                                    <i class="feather icon-log-out"></i><br>Check Out
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="col-6">
+                        <div class="d-grid">
+                            <a href="{{ route('karyawan.kpi.index') }}" class="btn btn-info btn-sm">
+                                <i class="feather icon-trending-up"></i><br>KPI
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="d-grid">
+                            <a href="{{ route('karyawan.cuti.create') }}" class="btn btn-warning btn-sm">
+                                <i class="feather icon-calendar"></i><br>Ajukan Cuti
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="d-grid">
+                            <a href="{{ route('karyawan.pengajuan-barang.create') }}" class="btn btn-secondary btn-sm">
+                                <i class="feather icon-package"></i><br>Pengajuan
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-user me-2"></i>
-                        Informasi Karyawan
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="text-center mb-3">
-                        <img src="{{ $karyawan->getPhotoUrl() }}" 
-                             alt="Profile" 
-                             class="rounded-circle" 
-                             style="width: 80px; height: 80px; object-fit: cover;">
+<!-- Recent Activities -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Pengajuan Barang Terbaru</h5>
+            </div>
+            <div class="card-body">
+                @if($recentPengajuan->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nama Barang</th>
+                                    <th>Spesifikasi</th>
+                                    <th>Jumlah</th>
+                                    <th>Status</th>
+                                    <th>Tanggal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($recentPengajuan as $pengajuan)
+                                    <tr>
+                                        <td>{{ $pengajuan->nama_barang }}</td>
+                                        <td>{{ $pengajuan->spesifikasi ?? '-' }}</td>
+                                        <td>{{ $pengajuan->jumlah }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ $pengajuan->getStatusColor() }}">
+                                                {{ $pengajuan->status->label() }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $pengajuan->created_at->format('d M Y') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                    
-                    <table class="table table-borderless table-sm">
-                        <tr>
-                            <td width="40%"><strong>NIK:</strong></td>
-                            <td>{{ $karyawan->nik }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Jabatan:</strong></td>
-                            <td>{{ $karyawan->jabatan }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Departemen:</strong></td>
-                            <td>{{ $karyawan->departemen }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Status:</strong></td>
-                            <td>
-                                <span class="badge bg-{{ $karyawan->status_karyawan->color() }}">
-                                    {{ $karyawan->status_karyawan->label() }}
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Kontrak:</strong></td>
-                            <td>
-                                <span class="badge bg-{{ $karyawan->jenis_kontrak->color() }}">
-                                    {{ $karyawan->jenis_kontrak->label() }}
-                                </span>
-                            </td>
-                        </tr>
-                    </table>
-
                     <div class="text-center mt-3">
-                        <a href="{{ route('karyawan.profile.show') }}" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-edit me-1"></i>
-                            Edit Profile
+                        <a href="{{ route('karyawan.pengajuan-barang.index') }}" class="btn btn-outline-primary">
+                            Lihat Semua Pengajuan
                         </a>
                     </div>
-                </div>
+                @else
+                    <div class="text-center py-4">
+                        <i class="feather icon-inbox f-40 text-muted mb-3"></i>
+                        <h6 class="text-muted">Belum ada pengajuan barang</h6>
+                        <a href="{{ route('karyawan.pengajuan-barang.create') }}" class="btn btn-primary">
+                            Buat Pengajuan Baru
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -512,7 +387,7 @@
 </div>
 @endsection
 
-@push('js')
+@section('scripts')
 <script>
 function checkIn() {
     $('#checkinModal').modal('show');
@@ -578,4 +453,4 @@ document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     });
 });
 </script>
-@endpush
+@endsection
