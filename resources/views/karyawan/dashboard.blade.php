@@ -10,118 +10,8 @@
 @section('content')
 <!-- [ Main Content ] start -->
 <div class="row">
-    <!-- Profile Card -->
-    <div class="col-md-4 col-sm-12">
-        <div class="card">
-            <div class="card-body position-relative">
-                <div class="text-center">
-                    <div class="chat-avtar d-inline-flex mx-auto">
-                        <img class="rounded-circle img-fluid wid-90 img-thumbnail" 
-                             src="{{ $karyawan->getPhotoUrl() }}" alt="User image">
-                    </div>
-                    <h5 class="mb-0">{{ $karyawan->display_name }}</h5>
-                    <p class="text-muted text-sm">{{ $karyawan->jabatan }}</p>
-                    <div class="row g-3">
-                        <div class="col-4">
-                            <h5 class="mb-0">{{ $absensiStats['hadir'] }}</h5>
-                            <small class="text-muted">Hadir</small>
-                        </div>
-                        <div class="col-4">
-                            <h5 class="mb-0">{{ $latestKPI ? $latestKPI->nilai_kpi : '-' }}</h5>
-                            <small class="text-muted">KPI</small>
-                        </div>
-                        <div class="col-4">
-                            <h5 class="mb-0">{{ $karyawan->work_duration }}</h5>
-                            <small class="text-muted">Masa Kerja</small>
-                        </div>
-                    </div>
-                    <div class="row g-2 mt-3">
-                        <div class="col-6">
-                            <a href="{{ route('karyawan.profile.show') }}" class="btn btn-outline-secondary btn-sm">
-                                <i class="feather icon-edit"></i> Profile
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="{{ route('karyawan.absensi.index') }}" class="btn btn-primary btn-sm">
-                                <i class="feather icon-calendar"></i> Absensi
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="col-md-8 col-sm-12">
-        <div class="row">
-            <div class="col-md-6 col-sm-12">
-                <div class="card bg-primary-dark">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h3 class="text-white">{{ $absensiStats['hadir'] }}/{{ $absensiStats['total'] }}</h3>
-                                <h6 class="text-white m-b-0">Kehadiran Bulan Ini</h6>
-                            </div>
-                            <div class="col-auto">
-                                <i class="feather icon-calendar text-white f-28"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-sm-12">
-                <div class="card bg-success-dark">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h3 class="text-white">{{ $latestKPI ? $latestKPI->nilai_kpi : 0 }}</h3>
-                                <h6 class="text-white m-b-0">KPI Terakhir</h6>
-                            </div>
-                            <div class="col-auto">
-                                <i class="feather icon-trending-up text-white f-28"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-sm-12">
-                <div class="card bg-warning-dark">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h3 class="text-white">{{ $pendingCuti }}</h3>
-                                <h6 class="text-white m-b-0">Cuti Pending</h6>
-                            </div>
-                            <div class="col-auto">
-                                <i class="feather icon-clock text-white f-28"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-sm-12">
-                <div class="card bg-info-dark">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h3 class="text-white">{{ $recentPengajuan->count() }}</h3>
-                                <h6 class="text-white m-b-0">Pengajuan Barang</h6>
-                            </div>
-                            <div class="col-auto">
-                                <i class="feather icon-package text-white f-28"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Alerts Section -->
-@if($contractInfo && $contractInfo['is_expiring_soon'])
-    <div class="row">
+    <!-- Notifications & Alerts -->
+    @if($contractInfo && $contractInfo['is_expiring_soon'])
         <div class="col-12">
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <strong>Perhatian!</strong> Kontrak kerja Anda akan berakhir pada {{ $contractInfo['end_date']->format('d M Y') }} 
@@ -129,11 +19,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
-    </div>
-@endif
+    @endif
 
-@if($activeSP > 0)
-    <div class="row">
+    @if($activeSP > 0)
         <div class="col-12">
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <strong>Peringatan!</strong> Anda memiliki {{ $activeSP }} surat peringatan yang masih aktif. 
@@ -141,11 +29,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
-    </div>
-@endif
+    @endif
 
-@if($activeHutang > 0)
-    <div class="row">
+    @if($activeHutang > 0)
         <div class="col-12">
             <div class="alert alert-info alert-dismissible fade show" role="alert">
                 <strong>Info!</strong> Anda memiliki hutang sebesar Rp {{ number_format($activeHutang, 0, ',', '.') }}. 
@@ -153,15 +39,161 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
-    </div>
-@endif
+    @endif
 
-<!-- Quick Actions & Today's Attendance -->
+    <!-- [ Row 1 ] start -->
+    <div class="col-md-12 col-xxl-4">
+        <div class="card statistics-card-1">
+            <div class="card-body">
+                <img src="{{ URL::asset('build/images/widget/img-status-2.svg') }}" alt="img" class="img-fluid img-bg" />
+                <div class="d-flex align-items-center">
+                    <div class="avtar bg-brand-color-1 text-white me-3">
+                        <i class="ph-duotone ph-calendar-check f-26"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-0">Kehadiran Bulan Ini</p>
+                        <div class="d-flex align-items-end">
+                            <h2 class="mb-0 f-w-500">{{ $absensiStats['hadir'] }}/{{ $absensiStats['total'] }}</h2>
+                            <span class="badge bg-light-success ms-2">
+                                @if($absensiStats['total'] > 0)
+                                    {{ round(($absensiStats['hadir'] / $absensiStats['total']) * 100, 1) }}%
+                                @else
+                                    0%
+                                @endif
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-4">
+        <div class="card statistics-card-1">
+            <div class="card-body">
+                <img src="{{ URL::asset('build/images/widget/img-status-1.svg') }}" alt="img" class="img-fluid img-bg" />
+                <div class="d-flex align-items-center">
+                    <div class="avtar bg-brand-color-2 text-white me-3">
+                        <i class="ph-duotone ph-chart-line-up f-26"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-0">KPI Terakhir</p>
+                        <div class="d-flex align-items-end">
+                            <h2 class="mb-0 f-w-500">
+                                @if($latestKPI)
+                                    {{ $latestKPI->nilai_kpi }}
+                                @else
+                                    -
+                                @endif
+                            </h2>
+                            @if($latestKPI)
+                                <span class="badge bg-light-primary ms-2">{{ $latestKPI->periode->format('M Y') }}</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-4">
+        <div class="card statistics-card-1">
+            <div class="card-body">
+                <img src="{{ URL::asset('build/images/widget/img-status-3.svg') }}" alt="img" class="img-fluid img-bg" />
+                <div class="d-flex align-items-center">
+                    <div class="avtar bg-brand-color-3 text-white me-3">
+                        <i class="ph-duotone ph-calendar-blank f-26"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-0">Cuti Pending</p>
+                        <div class="d-flex align-items-end">
+                            <h2 class="mb-0 f-w-500">{{ $pendingCuti }}</h2>
+                            <span class="badge bg-light-warning ms-2">Menunggu</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 col-xxl-4">
+        <div class="card statistics-card-1">
+            <div class="card-body">
+                <img src="{{ URL::asset('build/images/widget/img-status-4.svg') }}" alt="img" class="img-fluid img-bg" />
+                <div class="d-flex align-items-center">
+                    <div class="avtar bg-brand-color-1 text-white me-3">
+                        <i class="ph-duotone ph-clock f-26"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-0">Masa Kerja</p>
+                        <div class="d-flex align-items-end">
+                            <h2 class="mb-0 f-w-500">{{ $karyawan->work_duration }}</h2>
+                            <span class="badge bg-light-info ms-2">{{ $karyawan->tanggal_masuk->format('M Y') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-4">
+        <div class="card statistics-card-1">
+            <div class="card-body">
+                <img src="{{ URL::asset('build/images/widget/img-status-5.svg') }}" alt="img" class="img-fluid img-bg" />
+                <div class="d-flex align-items-center">
+                    <div class="avtar bg-brand-color-2 text-white me-3">
+                        <i class="ph-duotone ph-package f-26"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-0">Pengajuan Barang</p>
+                        <div class="d-flex align-items-end">
+                            <h2 class="mb-0 f-w-500">{{ $recentPengajuan->count() }}</h2>
+                            <span class="badge bg-light-secondary ms-2">Total</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-4">
+        <div class="card statistics-card-1">
+            <div class="card-body">
+                <img src="{{ URL::asset('build/images/widget/img-status-3.svg') }}" alt="img" class="img-fluid img-bg" />
+                <div class="d-flex align-items-center">
+                    <div class="avtar bg-brand-color-3 text-white me-3">
+                        <i class="ph-duotone ph-user-circle f-26"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-0">Status Karyawan</p>
+                        <div class="d-flex align-items-end">
+                            <h2 class="mb-0 f-w-500">{{ $karyawan->status_karyawan->label() }}</h2>
+                            <span class="badge bg-{{ $karyawan->status_karyawan->color() }} ms-2">{{ $karyawan->jenis_kontrak->label() }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- [ Row 1 ] end -->
+</div>
+
+<!-- Additional Content Sections -->
 <div class="row">
+    <!-- Today's Attendance -->
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h5>Absensi Hari Ini - {{ now()->format('d M Y') }}</h5>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Absensi Hari Ini - {{ now()->format('d M Y') }}</h5>
+                    <div class="d-flex align-items-center">
+                        @if(!$todayAbsensi || !$todayAbsensi->jam_masuk)
+                            <button class="btn btn-success btn-sm me-2" onclick="checkIn()">
+                                <i class="ph-duotone ph-sign-in me-1"></i>Check In
+                            </button>
+                        @endif
+                        @if($todayAbsensi && $todayAbsensi->jam_masuk && !$todayAbsensi->jam_keluar)
+                            <button class="btn btn-danger btn-sm" onclick="checkOut()">
+                                <i class="ph-duotone ph-sign-out me-1"></i>Check Out
+                            </button>
+                        @endif
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 @if($todayAbsensi)
@@ -169,7 +201,7 @@
                         <div class="col-md-6">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="avtar avtar-s bg-light-success me-3">
-                                    <i class="feather icon-log-in"></i>
+                                    <i class="ph-duotone ph-sign-in"></i>
                                 </div>
                                 <div>
                                     <h6 class="mb-0">Jam Masuk</h6>
@@ -189,7 +221,7 @@
                         <div class="col-md-6">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="avtar avtar-s bg-light-danger me-3">
-                                    <i class="feather icon-log-out"></i>
+                                    <i class="ph-duotone ph-sign-out"></i>
                                 </div>
                                 <div>
                                     <h6 class="mb-0">Jam Keluar</h6>
@@ -207,13 +239,13 @@
                     
                     @if($todayAbsensi->jam_masuk && $todayAbsensi->jam_keluar)
                         <div class="alert alert-success">
-                            <i class="feather icon-clock me-2"></i>
+                            <i class="ph-duotone ph-clock me-2"></i>
                             Total jam kerja: {{ $todayAbsensi->getWorkingHours() }} jam
                         </div>
                     @endif
                 @else
                     <div class="text-center py-4">
-                        <i class="feather icon-calendar f-40 text-muted mb-3"></i>
+                        <i class="ph-duotone ph-calendar-x f-40 text-muted mb-3"></i>
                         <h6 class="text-muted">Belum ada absensi hari ini</h6>
                         <p class="text-muted">Silakan lakukan check-in untuk memulai hari kerja</p>
                     </div>
@@ -222,55 +254,40 @@
         </div>
     </div>
 
+    <!-- Profile & Quick Actions -->
     <div class="col-md-4">
         <div class="card">
-            <div class="card-header">
-                <h5>Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-2">
-                    @if(!$todayAbsensi || !$todayAbsensi->jam_masuk)
-                        <div class="col-6">
-                            <div class="d-grid">
-                                <button class="btn btn-success btn-sm" onclick="checkIn()">
-                                    <i class="feather icon-log-in"></i><br>Check In
-                                </button>
-                            </div>
-                        </div>
-                    @endif
-
-                    @if($todayAbsensi && $todayAbsensi->jam_masuk && !$todayAbsensi->jam_keluar)
-                        <div class="col-6">
-                            <div class="d-grid">
-                                <button class="btn btn-danger btn-sm" onclick="checkOut()">
-                                    <i class="feather icon-log-out"></i><br>Check Out
-                                </button>
-                            </div>
-                        </div>
-                    @endif
-
+            <div class="card-body text-center">
+                <div class="chat-avtar d-inline-flex mx-auto">
+                    <img class="rounded-circle img-fluid wid-90 img-thumbnail" 
+                         src="{{ $karyawan->getPhotoUrl() }}" alt="User image">
+                </div>
+                <h5 class="mb-0 mt-3">{{ $karyawan->display_name }}</h5>
+                <p class="text-muted text-sm">{{ $karyawan->jabatan }}</p>
+                <p class="text-muted text-sm">{{ $karyawan->departemen }}</p>
+                
+                <div class="row g-3 mt-3">
                     <div class="col-6">
-                        <div class="d-grid">
-                            <a href="{{ route('karyawan.kpi.index') }}" class="btn btn-info btn-sm">
-                                <i class="feather icon-trending-up"></i><br>KPI
-                            </a>
-                        </div>
+                        <a href="{{ route('karyawan.profile.show') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="ph-duotone ph-user-circle me-1"></i>Profile
+                        </a>
                     </div>
-
                     <div class="col-6">
-                        <div class="d-grid">
-                            <a href="{{ route('karyawan.cuti.create') }}" class="btn btn-warning btn-sm">
-                                <i class="feather icon-calendar"></i><br>Ajukan Cuti
-                            </a>
-                        </div>
+                        <a href="{{ route('karyawan.absensi.index') }}" class="btn btn-primary btn-sm">
+                            <i class="ph-duotone ph-calendar-check me-1"></i>Absensi
+                        </a>
                     </div>
-
+                </div>
+                <div class="row g-3 mt-2">
                     <div class="col-6">
-                        <div class="d-grid">
-                            <a href="{{ route('karyawan.pengajuan-barang.create') }}" class="btn btn-secondary btn-sm">
-                                <i class="feather icon-package"></i><br>Pengajuan
-                            </a>
-                        </div>
+                        <a href="{{ route('karyawan.kpi.index') }}" class="btn btn-outline-info btn-sm">
+                            <i class="ph-duotone ph-chart-line-up me-1"></i>KPI
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ route('karyawan.cuti.create') }}" class="btn btn-outline-warning btn-sm">
+                            <i class="ph-duotone ph-calendar-plus me-1"></i>Cuti
+                        </a>
                     </div>
                 </div>
             </div>
@@ -283,12 +300,17 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5>Pengajuan Barang Terbaru</h5>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Pengajuan Barang Terbaru</h5>
+                    <a href="{{ route('karyawan.pengajuan-barang.index') }}" class="btn btn-outline-primary btn-sm">
+                        Lihat Semua
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 @if($recentPengajuan->count() > 0)
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover table-borderless table-sm mb-0">
                             <thead>
                                 <tr>
                                     <th>Nama Barang</th>
@@ -315,14 +337,9 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="text-center mt-3">
-                        <a href="{{ route('karyawan.pengajuan-barang.index') }}" class="btn btn-outline-primary">
-                            Lihat Semua Pengajuan
-                        </a>
-                    </div>
                 @else
                     <div class="text-center py-4">
-                        <i class="feather icon-inbox f-40 text-muted mb-3"></i>
+                        <i class="ph-duotone ph-package f-40 text-muted mb-3"></i>
                         <h6 class="text-muted">Belum ada pengajuan barang</h6>
                         <a href="{{ route('karyawan.pengajuan-barang.create') }}" class="btn btn-primary">
                             Buat Pengajuan Baru
