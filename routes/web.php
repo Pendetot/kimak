@@ -251,12 +251,10 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::HRD->value])->prefix('hrd')
 
 // Keuangan Routes
 Route::middleware(['auth', 'check.role:' . RoleEnum::Keuangan->value])->prefix('keuangan')->name('keuangan.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('keuangan.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\Keuangan\KeuanganController::class, 'index'])->name('dashboard');
     Route::resource('hutang-karyawans', HutangKaryawanController::class);
     Route::resource('rekening-karyawans', RekeningKaryawanController::class);
-    Route::get('/penalti-sp', [App\Http\Controllers\Keuangan\KeuanganController::class, 'indexPenalti'])->name('penalti-sp.index');
+    Route::get('/penalti-sp', [App\Http\Controllers\Keuangan\PenaltiSPController::class, 'index'])->name('penalti-sp.index');
     Route::resource('surat-peringatan', SuratPeringatanController::class)->only(['show', 'edit', 'update', 'destroy']);
     Route::get('/surat-peringatan/create', [SuratPeringatanController::class, 'create'])->name('surat-peringatan.create');
     Route::post('/surat-peringatan', [SuratPeringatanController::class, 'store'])->name('surat-peringatan.store');
@@ -336,11 +334,9 @@ Route::prefix('karyawan')->name('karyawan.')->group(function () {
     ]);
 });
 
-// Guard Routes
+// Logistik Routes
 Route::middleware(['auth', 'check.role:' . RoleEnum::Logistik->value])->prefix('logistik')->name('logistik.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('logistik.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\Logistik\LogistikController::class, 'index'])->name('dashboard');
     // Pengajuan Barang Routes for Logistic
     Route::resource('pengajuan-barang', App\Http\Controllers\Logistik\PengajuanBarangController::class);
 });

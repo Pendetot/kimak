@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Keuangan;
 
 use App\Models\HutangKaryawan;
+use App\Models\Karyawan;
 use App\Http\Requests\StoreHutangKaryawanRequest;
 use App\Http\Requests\UpdateHutangKaryawanRequest;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class HutangKaryawanController extends Controller
      */
     public function index()
     {
-        $hutangKaryawans = HutangKaryawan::with('user')->get();
+        $hutangKaryawans = HutangKaryawan::with('karyawan')->get();
         return view('keuangan.hutang_karyawans.index', compact('hutangKaryawans'));
     }
 
@@ -24,7 +25,7 @@ class HutangKaryawanController extends Controller
      */
     public function create()
     {
-        $karyawans = \App\Models\Karyawan::all();
+        $karyawans = Karyawan::all();
         return view('keuangan.hutang_karyawans.create', compact('karyawans'));
     }
 
@@ -43,6 +44,7 @@ class HutangKaryawanController extends Controller
      */
     public function show(HutangKaryawan $hutangKaryawan)
     {
+        $hutangKaryawan->load('karyawan');
         return view('keuangan.hutang_karyawans.show', compact('hutangKaryawan'));
     }
 
@@ -51,9 +53,8 @@ class HutangKaryawanController extends Controller
      */
     public function edit(HutangKaryawan $hutangKaryawan)
     {
-        $karyawans = \App\Models\Karyawan::all();
-        $users = \App\Models\User::all();
-        return view('keuangan.hutang_karyawans.edit', compact('hutangKaryawan', 'users', 'karyawans'));
+        $karyawans = Karyawan::all();
+        return view('keuangan.hutang_karyawans.edit', compact('hutangKaryawan', 'karyawans'));
     }
 
     /**

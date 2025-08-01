@@ -16,20 +16,31 @@ class SuperAdminDashboardController extends Controller
 {
     public function index()
     {
+        // System overview counts
         $totalUsers = User::count();
         $totalKaryawan = Karyawan::count();
         $totalPelamar = Pelamar::count();
-        $totalHutangKaryawan = HutangKaryawan::sum('amount');
+        
+        // Fix: use correct field name for hutang amount
+        $totalHutangKaryawan = HutangKaryawan::sum('jumlah');
         $totalSuratPeringatan = SuratPeringatan::count();
 
+        // Role counts for system users (excluding karyawan since they're in separate table now)
         $roleCounts = [
             'Super Admin' => User::where('role', RoleEnum::SuperAdmin->value)->count(),
             'HRD' => User::where('role', RoleEnum::HRD->value)->count(),
             'Keuangan' => User::where('role', RoleEnum::Keuangan->value)->count(),
-            'Karyawan' => User::where('role', RoleEnum::Karyawan->value)->count(),
             'Logistik' => User::where('role', RoleEnum::Logistik->value)->count(),
+            'Pelamar' => User::where('role', RoleEnum::Pelamar->value)->count(),
         ];
 
-        return view('superadmin.dashboard', compact('totalUsers', 'totalKaryawan', 'totalPelamar', 'totalHutangKaryawan', 'totalSuratPeringatan', 'roleCounts'));
+        return view('superadmin.dashboard', compact(
+            'totalUsers', 
+            'totalKaryawan', 
+            'totalPelamar', 
+            'totalHutangKaryawan', 
+            'totalSuratPeringatan', 
+            'roleCounts'
+        ));
     }
 }
