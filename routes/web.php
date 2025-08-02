@@ -12,7 +12,14 @@ use App\Http\Controllers\HRD\FormController;
 use App\Http\Controllers\HRD\MutasiController;
 use App\Http\Controllers\HRD\ResignController;
 use App\Http\Controllers\HRD\SuratPeringatanController;
+use App\Http\Controllers\HRD\InterviewAttendanceController;
 use App\Http\Controllers\Keuangan\KeuanganController;
+use App\Http\Controllers\Keuangan\PembayaranController;
+use App\Http\Controllers\Keuangan\GajiController;
+use App\Http\Controllers\Logistik\BarangController;
+use App\Http\Controllers\Logistik\StockController;
+use App\Http\Controllers\Logistik\DistribusiController;
+use App\Http\Controllers\Pelamar\PelamarController;
 use App\Http\Controllers\Karyawan\KPIController;
 use App\Http\Controllers\Karyawan\AbsensiController;
 use App\Http\Controllers\Karyawan\LapDokumenController;
@@ -72,8 +79,7 @@ Route::get('/', function () {
 });
 
 
-    Route::get('/hutang', [App\Http\Controllers\Keuangan\HutangController::class, 'indexHutang'])->name('hutang.index');
-    Route::get('/hutang/{hutangKaryawan}', [App\Http\Controllers\Keuangan\HutangController::class, 'showHutang'])->name('hutang.show');
+// Moved these routes to Keuangan group to avoid conflicts
 
 Route::post('/pelamar/store', [App\Http\Controllers\HRD\PelamarController::class, 'store'])->name('pelamar.store');
 Route::get('/pelamar/store', function () {
@@ -169,8 +175,19 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::SuperAdmin->value])->prefix
         Route::get('/analytics', [App\Http\Controllers\SuperAdmin\LaporanController::class, 'analytics'])->name('analytics');
         Route::get('/dashboard-data', [App\Http\Controllers\SuperAdmin\LaporanController::class, 'dashboardData'])->name('dashboard-data');
     });
-    Route::get('/administrasi-pelamar', [App\Http\Controllers\HRD\PelamarController::class, 'index'])->name('administrasi-pelamar.index');
+    // Moved to HRD routes to avoid duplication
     Route::get('/interview-attendance', [App\Http\Controllers\HRD\InterviewAttendanceController::class, 'index'])->name('interview-attendance.index');
+    
+    // Interview Attendance Routes for HRD
+    Route::prefix('interview-attendance')->name('interview-attendance.')->group(function () {
+        Route::get('/', [App\Http\Controllers\HRD\InterviewAttendanceController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\HRD\InterviewAttendanceController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\HRD\InterviewAttendanceController::class, 'store'])->name('store');
+        Route::get('/{attendance}', [App\Http\Controllers\HRD\InterviewAttendanceController::class, 'show'])->name('show');
+        Route::get('/{attendance}/edit', [App\Http\Controllers\HRD\InterviewAttendanceController::class, 'edit'])->name('edit');
+        Route::put('/{attendance}', [App\Http\Controllers\HRD\InterviewAttendanceController::class, 'update'])->name('update');
+        Route::delete('/{attendance}', [App\Http\Controllers\HRD\InterviewAttendanceController::class, 'destroy'])->name('destroy');
+    });
 
     // Pengajuan Barang Routes for Director
     Route::get('/pengajuan-barang', [App\Http\Controllers\SuperAdmin\DirectorPengajuanBarangController::class, 'index'])->name('pengajuan-barang.index');
@@ -320,6 +337,30 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::Keuangan->value])->prefix('
     Route::get('/surat-peringatan/create', [SuratPeringatanController::class, 'create'])->name('surat-peringatan.create');
     Route::post('/surat-peringatan', [SuratPeringatanController::class, 'store'])->name('surat-peringatan.store');
 
+    // Pembayaran Routes for Keuangan
+    Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Keuangan\PembayaranController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Keuangan\PembayaranController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Keuangan\PembayaranController::class, 'store'])->name('store');
+        Route::get('/{pembayaran}', [App\Http\Controllers\Keuangan\PembayaranController::class, 'show'])->name('show');
+        Route::get('/{pembayaran}/edit', [App\Http\Controllers\Keuangan\PembayaranController::class, 'edit'])->name('edit');
+        Route::put('/{pembayaran}', [App\Http\Controllers\Keuangan\PembayaranController::class, 'update'])->name('update');
+        Route::delete('/{pembayaran}', [App\Http\Controllers\Keuangan\PembayaranController::class, 'destroy'])->name('destroy');
+    });
+
+    // Gaji Routes for Keuangan
+    Route::prefix('gaji')->name('gaji.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Keuangan\GajiController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Keuangan\GajiController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Keuangan\GajiController::class, 'store'])->name('store');
+        Route::get('/{gaji}', [App\Http\Controllers\Keuangan\GajiController::class, 'show'])->name('show');
+        Route::get('/{gaji}/edit', [App\Http\Controllers\Keuangan\GajiController::class, 'edit'])->name('edit');
+        Route::put('/{gaji}', [App\Http\Controllers\Keuangan\GajiController::class, 'update'])->name('update');
+        Route::delete('/{gaji}', [App\Http\Controllers\Keuangan\GajiController::class, 'destroy'])->name('destroy');
+        Route::post('/{gaji}/process', [App\Http\Controllers\Keuangan\GajiController::class, 'process'])->name('process');
+        Route::get('/slip/{gaji}', [App\Http\Controllers\Keuangan\GajiController::class, 'generateSlip'])->name('slip');
+    });
+
     // Laporan Routes for Keuangan
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/hutang', [App\Http\Controllers\Keuangan\LaporanController::class, 'hutang'])->name('hutang');
@@ -439,6 +480,42 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::Logistik->value])->prefix('
     Route::post('/vendor/{id}/restore', [App\Http\Controllers\Logistik\VendorController::class, 'restore'])->name('vendor.restore');
     Route::delete('/vendor/{id}/force-delete', [App\Http\Controllers\Logistik\VendorController::class, 'forceDelete'])->name('vendor.force-delete');
 
+    // Barang/Inventory Routes for Logistik
+    Route::prefix('barang')->name('barang.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Logistik\BarangController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Logistik\BarangController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Logistik\BarangController::class, 'store'])->name('store');
+        Route::get('/{barang}', [App\Http\Controllers\Logistik\BarangController::class, 'show'])->name('show');
+        Route::get('/{barang}/edit', [App\Http\Controllers\Logistik\BarangController::class, 'edit'])->name('edit');
+        Route::put('/{barang}', [App\Http\Controllers\Logistik\BarangController::class, 'update'])->name('update');
+        Route::delete('/{barang}', [App\Http\Controllers\Logistik\BarangController::class, 'destroy'])->name('destroy');
+    });
+
+    // Stock Management Routes for Logistik
+    Route::prefix('stock')->name('stock.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Logistik\StockController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Logistik\StockController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Logistik\StockController::class, 'store'])->name('store');
+        Route::get('/{stock}', [App\Http\Controllers\Logistik\StockController::class, 'show'])->name('show');
+        Route::get('/{stock}/edit', [App\Http\Controllers\Logistik\StockController::class, 'edit'])->name('edit');
+        Route::put('/{stock}', [App\Http\Controllers\Logistik\StockController::class, 'update'])->name('update');
+        Route::delete('/{stock}', [App\Http\Controllers\Logistik\StockController::class, 'destroy'])->name('destroy');
+        Route::post('/{stock}/adjust', [App\Http\Controllers\Logistik\StockController::class, 'adjust'])->name('adjust');
+        Route::get('/movements', [App\Http\Controllers\Logistik\StockController::class, 'movements'])->name('movements');
+    });
+
+    // Distribusi Routes for Logistik
+    Route::prefix('distribusi')->name('distribusi.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Logistik\DistribusiController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Logistik\DistribusiController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Logistik\DistribusiController::class, 'store'])->name('store');
+        Route::get('/{distribusi}', [App\Http\Controllers\Logistik\DistribusiController::class, 'show'])->name('show');
+        Route::get('/{distribusi}/edit', [App\Http\Controllers\Logistik\DistribusiController::class, 'edit'])->name('edit');
+        Route::put('/{distribusi}', [App\Http\Controllers\Logistik\DistribusiController::class, 'update'])->name('update');
+        Route::delete('/{distribusi}', [App\Http\Controllers\Logistik\DistribusiController::class, 'destroy'])->name('destroy');
+        Route::post('/{distribusi}/confirm', [App\Http\Controllers\Logistik\DistribusiController::class, 'confirm'])->name('confirm');
+    });
+
     // Laporan Routes for Logistik
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/pembelian', [App\Http\Controllers\Logistik\LaporanController::class, 'pembelian'])->name('pembelian');
@@ -454,4 +531,10 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::Logistik->value])->prefix('
 Route::middleware(['auth', 'check.role:' . RoleEnum::Pelamar->value . ',' . RoleEnum::SuperAdmin->value])->prefix('pelamar')->name('pelamar.')->group(function () {
     Route::get('/dashboard/{pelamar?}', [App\Http\Controllers\Pelamar\PelamarDashboardController::class, 'index'])->name('dashboard');
     Route::post('/update-attendance/{pelamar}', [App\Http\Controllers\Pelamar\PelamarDashboardController::class, 'updateAttendance'])->name('update-attendance');
+    
+    // Individual pelamar management (for pelamar role users)
+    Route::get('/edit/{pelamar}', [App\Http\Controllers\Pelamar\PelamarController::class, 'edit'])->name('edit');
+    Route::put('/update/{pelamar}', [App\Http\Controllers\Pelamar\PelamarController::class, 'update'])->name('update');
+    Route::get('/upload-documents/{pelamar}', [App\Http\Controllers\Pelamar\PelamarController::class, 'showUploadForm'])->name('upload-documents');
+    Route::post('/upload-documents/{pelamar}', [App\Http\Controllers\Pelamar\PelamarController::class, 'uploadDocuments'])->name('store-documents');
 });
