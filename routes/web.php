@@ -125,6 +125,17 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::SuperAdmin->value])->prefix
         Route::post('{pengajuanBarang}/approve', [App\Http\Controllers\SuperAdmin\PengajuanBarangApprovalController::class, 'approve'])->name('approve');
         Route::post('{pengajuanBarang}/reject', [App\Http\Controllers\SuperAdmin\PengajuanBarangApprovalController::class, 'reject'])->name('reject');
     });
+
+    // HRD Pengajuan Barang Routes for SuperAdmin - Final Approval
+    Route::prefix('pengajuan-barang-hrd')->name('pengajuan-barang-hrd.')->group(function () {
+        Route::get('/', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'index'])->name('index');
+        Route::get('/{pengajuanBarang}', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'show'])->name('show');
+        Route::get('/{pengajuanBarang}/approval/{action}', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'showApprovalForm'])->name('approval-form');
+        Route::post('/{pengajuanBarang}/approve', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'approve'])->name('approve');
+        Route::post('/{pengajuanBarang}/reject', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'reject'])->name('reject');
+        Route::post('/bulk-approve', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'bulkApprove'])->name('bulk-approve');
+        Route::get('/export-report', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'exportReport'])->name('export-report');
+    });
     Route::get('/administrasi-pelamar', [App\Http\Controllers\HRD\PelamarController::class, 'index'])->name('administrasi-pelamar.index');
     Route::get('/interview-attendance', [App\Http\Controllers\HRD\InterviewAttendanceController::class, 'index'])->name('interview-attendance.index');
 
