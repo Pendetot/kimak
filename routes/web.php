@@ -160,6 +160,15 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::SuperAdmin->value])->prefix
         Route::post('/bulk-approve', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'bulkApprove'])->name('bulk-approve');
         Route::get('/export-report', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'exportReport'])->name('export-report');
     });
+
+    // Laporan & Analytics Routes for SuperAdmin
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/karyawan', [App\Http\Controllers\SuperAdmin\LaporanController::class, 'karyawan'])->name('karyawan');
+        Route::get('/keuangan', [App\Http\Controllers\SuperAdmin\LaporanController::class, 'keuangan'])->name('keuangan');
+        Route::get('/logistik', [App\Http\Controllers\SuperAdmin\LaporanController::class, 'logistik'])->name('logistik');
+        Route::get('/analytics', [App\Http\Controllers\SuperAdmin\LaporanController::class, 'analytics'])->name('analytics');
+        Route::get('/dashboard-data', [App\Http\Controllers\SuperAdmin\LaporanController::class, 'dashboardData'])->name('dashboard-data');
+    });
     Route::get('/administrasi-pelamar', [App\Http\Controllers\HRD\PelamarController::class, 'index'])->name('administrasi-pelamar.index');
     Route::get('/interview-attendance', [App\Http\Controllers\HRD\InterviewAttendanceController::class, 'index'])->name('interview-attendance.index');
 
@@ -286,6 +295,18 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::HRD->value])->prefix('hrd')
     // Banking Routes
     Route::get('pelamars/{pelamar}/banking', [PelamarController::class, 'showBankingForm'])->name('administrasi-pelamar.show-banking-form');
     Route::post('pelamars/{pelamar}/banking', [App\Http\Controllers\HRD\PelamarController::class, 'storeBankingData'])->name('administrasi-pelamar.store-banking-data');
+
+    // Laporan Routes for HRD
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/', [App\Http\Controllers\HRD\LaporanController::class, 'index'])->name('index');
+        Route::get('/karyawan', [App\Http\Controllers\HRD\LaporanController::class, 'karyawan'])->name('karyawan');
+        Route::get('/cuti', [App\Http\Controllers\HRD\LaporanController::class, 'cuti'])->name('cuti');
+        Route::get('/mutasi', [App\Http\Controllers\HRD\LaporanController::class, 'mutasi'])->name('mutasi');
+        Route::get('/resign', [App\Http\Controllers\HRD\LaporanController::class, 'resign'])->name('resign');
+        Route::get('/pelamar', [App\Http\Controllers\HRD\LaporanController::class, 'pelamar'])->name('pelamar');
+        Route::get('/kpi', [App\Http\Controllers\HRD\LaporanController::class, 'kpi'])->name('kpi');
+        Route::get('/absensi', [App\Http\Controllers\HRD\LaporanController::class, 'absensi'])->name('absensi');
+    });
 });
 
 // Keuangan Routes
@@ -298,6 +319,16 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::Keuangan->value])->prefix('
     Route::resource('surat-peringatan', SuratPeringatanController::class)->only(['show', 'edit', 'update', 'destroy']);
     Route::get('/surat-peringatan/create', [SuratPeringatanController::class, 'create'])->name('surat-peringatan.create');
     Route::post('/surat-peringatan', [SuratPeringatanController::class, 'store'])->name('surat-peringatan.store');
+
+    // Laporan Routes for Keuangan
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/hutang', [App\Http\Controllers\Keuangan\LaporanController::class, 'hutang'])->name('hutang');
+        Route::get('/gaji', [App\Http\Controllers\Keuangan\LaporanController::class, 'gaji'])->name('gaji');
+        Route::get('/cash-flow', [App\Http\Controllers\Keuangan\LaporanController::class, 'cashFlow'])->name('cash-flow');
+        Route::get('/penalti', [App\Http\Controllers\Keuangan\LaporanController::class, 'penalti'])->name('penalti');
+        Route::get('/rekening', [App\Http\Controllers\Keuangan\LaporanController::class, 'rekening'])->name('rekening');
+        Route::get('/pembayaran', [App\Http\Controllers\Keuangan\LaporanController::class, 'pembayaran'])->name('pembayaran');
+    });
 });
 
 // Karyawan Authentication Routes
@@ -407,6 +438,16 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::Logistik->value])->prefix('
     Route::post('/vendor/{vendor}/update-rating', [App\Http\Controllers\Logistik\VendorController::class, 'updateRating'])->name('vendor.update-rating');
     Route::post('/vendor/{id}/restore', [App\Http\Controllers\Logistik\VendorController::class, 'restore'])->name('vendor.restore');
     Route::delete('/vendor/{id}/force-delete', [App\Http\Controllers\Logistik\VendorController::class, 'forceDelete'])->name('vendor.force-delete');
+
+    // Laporan Routes for Logistik
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/pembelian', [App\Http\Controllers\Logistik\LaporanController::class, 'pembelian'])->name('pembelian');
+        Route::get('/stock', [App\Http\Controllers\Logistik\LaporanController::class, 'stock'])->name('stock');
+        Route::get('/distribusi', [App\Http\Controllers\Logistik\LaporanController::class, 'distribusi'])->name('distribusi');
+        Route::get('/vendor', [App\Http\Controllers\Logistik\LaporanController::class, 'vendor'])->name('vendor');
+        Route::get('/pengajuan-barang', [App\Http\Controllers\Logistik\LaporanController::class, 'pengajuanBarang'])->name('pengajuan-barang');
+        Route::get('/performance', [App\Http\Controllers\Logistik\LaporanController::class, 'performance'])->name('performance');
+    });
 });
 
 // Pelamar Routes
