@@ -211,39 +211,15 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::HRD->value])->prefix('hrd')
     Route::get('/pengajuan-barang/{pengajuanBarang}/duplicate', [App\Http\Controllers\HRD\PengajuanBarangController::class, 'duplicate'])->name('pengajuan-barang.duplicate');
     Route::post('/pengajuan-barang/{pengajuanBarang}/duplicate', [App\Http\Controllers\HRD\PengajuanBarangController::class, 'storeDuplicate'])->name('pengajuan-barang.store-duplicate');
 
-    Route::resource('karyawans', KaryawanController::class)->names([
-        'index' => 'data-karyawan',
-        'create' => 'data-karyawan.create',
-        'store' => 'data-karyawan.store',
-        'show' => 'data-karyawan.show',
-        'edit' => 'data-karyawan.edit',
-        'update' => 'data-karyawan.update',
-        'destroy' => 'data-karyawan.destroy',
-    ]);
+    Route::resource('karyawans', KaryawanController::class);
 
-    Route::resource('cutis', CutiController::class)->names([
-        'index' => 'pengajuan-cuti',
-        'create' => 'pengajuan-cuti.create',
-        'store' => 'pengajuan-cuti.store',
-        'show' => 'pengajuan-cuti.show',
-        'edit' => 'pengajuan-cuti.edit',
-        'update' => 'pengajuan-cuti.update',
-        'destroy' => 'pengajuan-cuti.destroy',
-    ]);
+    Route::resource('cutis', CutiController::class);
     Route::post('cutis/{cuti}/approve', [CutiController::class, 'approve'])->name('pengajuan-cuti.approve');
     Route::post('cutis/{cuti}/reject', [CutiController::class, 'reject'])->name('pengajuan-cuti.reject');
     Route::get('cutis/template/download', [CutiController::class, 'downloadTemplate'])->name('pengajuan-cuti.download-template');
     Route::get('cutis/{cuti}/generate-document', [CutiController::class, 'generateDocument'])->name('pengajuan-cuti.generate-document');
 
-    Route::resource('resigns', ResignController::class)->names([
-        'index' => 'data-resign',
-        'create' => 'data-resign.create',
-        'store' => 'data-resign.store',
-        'show' => 'data-resign.show',
-        'edit' => 'data-resign.edit',
-        'update' => 'data-resign.update',
-        'destroy' => 'data-resign.destroy',
-    ]);
+    Route::resource('resigns', ResignController::class);
     Route::post('resigns/{resign}/approve', [ResignController::class, 'approve'])->name('data-resign.approve');
     Route::post('resigns/{resign}/reject', [ResignController::class, 'reject'])->name('data-resign.reject');
 
@@ -257,15 +233,7 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::HRD->value])->prefix('hrd')
         'destroy' => 'surat-peringatan.destroy',
     ]);
 
-    Route::resource('mutasis', MutasiController::class)->names([
-        'index' => 'mutasi-karyawan',
-        'create' => 'mutasi-karyawan.create',
-        'store' => 'mutasi-karyawan.store',
-        'show' => 'mutasi-karyawan.show',
-        'edit' => 'mutasi-karyawan.edit',
-        'update' => 'mutasi-karyawan.update',
-        'destroy' => 'mutasi-karyawan.destroy',
-    ]);
+    Route::resource('mutasis', MutasiController::class);
 
     Route::resource('pelamars', PelamarController::class)->names([
         'index' => 'administrasi-pelamar',

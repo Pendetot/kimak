@@ -79,7 +79,7 @@
         <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
     </a>
     <ul class="pc-submenu">
-        <li class="pc-item"><a class="pc-link" href="{{ route('hrd.pelamars.index') }}">Daftar Pelamar</a></li>
+        <li class="pc-item"><a class="pc-link" href="{{ route('hrd.administrasi-pelamar') }}">Daftar Pelamar</a></li>
         <li class="pc-item"><a class="pc-link" href="{{ route('hrd.interview-attendance.index') }}">Kehadiran Interview</a></li>
     </ul>
 </li>

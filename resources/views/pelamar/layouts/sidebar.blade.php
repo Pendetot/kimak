@@ -28,7 +28,7 @@
   </a>
 </li>
 <li class="pc-item">
-  <a href="{{ route('hrd.administrasi-pelamar.show-confirm-interview', Auth::user()->pelamar->id) }}" class="pc-link">
+  <a href="{{ route('pelamar.show-confirm-interview', Auth::user()->pelamar->id) }}" class="pc-link">
     <span class="pc-micon">
       <i class="ph-duotone ph-calendar-check"></i>
     </span>
