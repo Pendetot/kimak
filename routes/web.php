@@ -336,21 +336,20 @@ Route::prefix('karyawan')->name('karyawan.')->group(function () {
             'show' => 'dokumen.show',
             'edit' => 'dokumen.edit',
             'update' => 'dokumen.update',
-        'store' => 'lap-dokumens.store',
-        'show' => 'lap-dokumens.show',
-        'edit' => 'lap-dokumens.edit',
-        'update' => 'lap-dokumens.update',
-        'destroy' => 'lap-dokumens.destroy',
-    ]);
-    Route::resource('pembinaans', App\Http\Controllers\Karyawan\PembinaanController::class)->names([
-        'index' => 'pembinaans',
-        'create' => 'pembinaans.create',
-        'store' => 'pembinaans.store',
-        'show' => 'pembinaans.show',
-        'edit' => 'pembinaans.edit',
-        'update' => 'pembinaans.update',
-        'destroy' => 'pembinaans.destroy',
-    ]);
+            'destroy' => 'dokumen.destroy',
+        ]);
+        
+        // Pembinaan Management
+        Route::resource('pembinaans', App\Http\Controllers\Karyawan\PembinaanController::class)->names([
+            'index' => 'pembinaans.index',
+            'create' => 'pembinaans.create',
+            'store' => 'pembinaans.store',
+            'show' => 'pembinaans.show',
+            'edit' => 'pembinaans.edit',
+            'update' => 'pembinaans.update',
+            'destroy' => 'pembinaans.destroy',
+        ]);
+    });
 });
 
 // Logistik Routes
