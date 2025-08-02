@@ -105,3 +105,32 @@ Route::prefix('pelamar')->group(function () {
     Route::get('/{pelamar}/upload-documents', [PelamarController::class, 'showDocumentUploadForm'])->name('pelamar.show-upload-documents')->middleware('auth:sanctum');
     Route::post('/{pelamar}/upload-documents', [PelamarController::class, 'uploadDocument'])->name('pelamar.upload-document')->middleware('auth:sanctum');
 });
+
+// Notification API Routes
+Route::prefix('notifications')->group(function () {
+    Route::get('/topbar', [App\Http\Controllers\NotificationController::class, 'getTopbarNotifications']);
+    Route::get('/unread-count', [App\Http\Controllers\NotificationController::class, 'getUnreadCount']);
+    Route::post('/mark-all-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+    Route::post('/bulk-action', [App\Http\Controllers\NotificationController::class, 'bulkAction']);
+    Route::get('/check-new/{lastNotificationId?}', [App\Http\Controllers\NotificationController::class, 'checkNew']);
+    Route::post('/{notification}/mark-read', [App\Http\Controllers\NotificationController::class, 'markAsRead']);
+    Route::delete('/{notification}', [App\Http\Controllers\NotificationController::class, 'destroy']);
+});
+
+// HRD Procurement API
+Route::prefix('hrd')->middleware('auth:sanctum')->group(function () {
+    Route::get('/pengajuan-barang/statistics', [App\Http\Controllers\HRD\PengajuanBarangController::class, 'getStatistics']);
+    Route::apiResource('pengajuan-barang', App\Http\Controllers\HRD\PengajuanBarangController::class);
+    Route::post('/pengajuan-barang/{pengajuanBarang}/duplicate', [App\Http\Controllers\HRD\PengajuanBarangController::class, 'storeDuplicate']);
+});
+
+// Logistik Procurement API
+Route::prefix('logistik')->middleware('auth:sanctum')->group(function () {
+    Route::get('/pengajuan-barang-hrd/statistics', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'getStatistics']);
+    Route::get('/pengajuan-barang-hrd', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'index']);
+    Route::get('/pengajuan-barang-hrd/{pengajuanBarang}', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'show']);
+    Route::post('/pengajuan-barang-hrd/{pengajuanBarang}/approve', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'approve']);
+    Route::post('/pengajuan-barang-hrd/{pengajuanBarang}/reject', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'reject']);
+    Route::post('/pengajuan-barang-hrd/{pengajuanBarang}/complete', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'complete']);
+    Route::post('/pengajuan-barang-hrd/bulk-approve', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'bulkApprove']);
+});

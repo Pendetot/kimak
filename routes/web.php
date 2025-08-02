@@ -76,7 +76,10 @@ Route::prefix('keuangan/auth')->name('keuangan.')->group(function () {
     Route::post('login', [LoginController::class, 'login'])->name('login');
 });
 
-
+// Notification Routes (requires authentication)
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+});
 
 Route::prefix('karyawan/auth')->name('karyawan.')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('showLoginForm');
@@ -142,9 +145,10 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::HRD->value])->prefix('hrd')
 
     Route::get('/kpi-penilaian', [App\Http\Controllers\HRD\KpiPenilaianController::class, 'index'])->name('kpi-penilaian.index');
 
-    // Pengajuan Barang Routes for HRD - TEMPORARILY DISABLED
-        Route::get('/pengajuan-barang/create', [App\Http\Controllers\HRD\HrdPengajuanBarangController::class, 'create'])->name('pengajuan-barang.create');
-    Route::post('/pengajuan-barang', [App\Http\Controllers\HRD\HrdPengajuanBarangController::class, 'store'])->name('pengajuan-barang.store');
+    // Pengajuan Barang Routes for HRD (New Employee Procurement)
+    Route::resource('pengajuan-barang', App\Http\Controllers\HRD\PengajuanBarangController::class);
+    Route::get('/pengajuan-barang/{pengajuanBarang}/duplicate', [App\Http\Controllers\HRD\PengajuanBarangController::class, 'duplicate'])->name('pengajuan-barang.duplicate');
+    Route::post('/pengajuan-barang/{pengajuanBarang}/duplicate', [App\Http\Controllers\HRD\PengajuanBarangController::class, 'storeDuplicate'])->name('pengajuan-barang.store-duplicate');
 
     Route::resource('karyawans', KaryawanController::class)->names([
         'index' => 'data-karyawan',
@@ -341,8 +345,29 @@ Route::prefix('karyawan')->name('karyawan.')->group(function () {
 // Logistik Routes
 Route::middleware(['auth', 'check.role:' . RoleEnum::Logistik->value])->prefix('logistik')->name('logistik.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Logistik\LogistikController::class, 'index'])->name('dashboard');
-    // Pengajuan Barang Routes for Logistic
+    
+    // Pengajuan Barang Routes for Logistic (existing karyawan requests)
     Route::resource('pengajuan-barang', App\Http\Controllers\Logistik\PengajuanBarangController::class);
+    
+    // HRD Pengajuan Barang Routes for Logistic (new employee procurement)
+    Route::prefix('pengajuan-barang-hrd')->name('pengajuan-barang-hrd.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'index'])->name('index');
+        Route::get('/{pengajuanBarang}', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'show'])->name('show');
+        Route::get('/{pengajuanBarang}/approval/{action}', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'showApprovalForm'])->name('approval-form');
+        Route::post('/{pengajuanBarang}/approve', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'approve'])->name('approve');
+        Route::post('/{pengajuanBarang}/reject', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'reject'])->name('reject');
+        Route::get('/{pengajuanBarang}/complete-form', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'showCompletionForm'])->name('completion-form');
+        Route::post('/{pengajuanBarang}/complete', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'complete'])->name('complete');
+        Route::post('/bulk-approve', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'bulkApprove'])->name('bulk-approve');
+    });
+    
+    // Pembelian Management
+    Route::resource('pembelian', App\Http\Controllers\Logistik\PembelianController::class);
+    Route::post('/pembelian/{pembelian}/process', [App\Http\Controllers\Logistik\PembelianController::class, 'process'])->name('pembelian.process');
+    Route::post('/pembelian/{pembelian}/complete', [App\Http\Controllers\Logistik\PembelianController::class, 'complete'])->name('pembelian.complete');
+    
+    // Vendor Management
+    Route::resource('vendor', App\Http\Controllers\Logistik\VendorController::class);
 });
 
 // Pelamar Routes
