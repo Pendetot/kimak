@@ -11,102 +11,84 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Helper function to safely update foreign key relationships
+        $updateForeignKey = function($tableName) {
+            if (Schema::hasTable($tableName) && Schema::hasColumn($tableName, 'karyawan_id')) {
+                Schema::table($tableName, function (Blueprint $table) {
+                    try {
+                        // Try to drop existing foreign key and index
+                        $table->dropForeign(['karyawan_id']);
+                    } catch (\Exception $e) {
+                        // Foreign key doesn't exist, continue
+                    }
+                    
+                    try {
+                        $table->dropIndex(['karyawan_id']);
+                    } catch (\Exception $e) {
+                        // Index doesn't exist, continue
+                    }
+                    
+                    // Add new foreign key and index
+                    $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
+                    $table->index(['karyawan_id']);
+                });
+            }
+        };
+
         // Update absensis table
-        Schema::table('absensis', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropIndex(['karyawan_id']);
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        $updateForeignKey('absensis');
 
         // Update cutis table
-        Schema::table('cutis', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropIndex(['karyawan_id']);
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        $updateForeignKey('cutis');
 
         // Update k_p_i_s table
-        Schema::table('k_p_i_s', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropIndex(['karyawan_id']);
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        $updateForeignKey('k_p_i_s');
 
         // Update pembinaans table
-        Schema::table('pembinaans', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropIndex(['karyawan_id']);
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        $updateForeignKey('pembinaans');
 
         // Update hutang_karyawans table
-        Schema::table('hutang_karyawans', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropIndex(['karyawan_id']);
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        $updateForeignKey('hutang_karyawans');
 
         // Update surat_peringatans table
-        Schema::table('surat_peringatans', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropIndex(['karyawan_id']);
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        $updateForeignKey('surat_peringatans');
 
         // Update penalti_s_p_s table
-        Schema::table('penalti_s_p_s', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropIndex(['karyawan_id']);
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        $updateForeignKey('penalti_s_p_s');
 
         // Update mutasis table
-        Schema::table('mutasis', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropIndex(['karyawan_id']);
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        $updateForeignKey('mutasis');
 
         // Update resigns table
-        Schema::table('resigns', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropIndex(['karyawan_id']);
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        $updateForeignKey('resigns');
 
         // Update rekening_karyawans table
-        Schema::table('rekening_karyawans', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropIndex(['karyawan_id']);
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        $updateForeignKey('rekening_karyawans');
 
         // Update lap_dokumens table
-        Schema::table('lap_dokumens', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropIndex(['karyawan_id']);
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        $updateForeignKey('lap_dokumens');
 
         // Update pengajuan_barangs table to reference karyawan instead of user
-        Schema::table('pengajuan_barangs', function (Blueprint $table) {
-            $table->dropForeign(['requester_id']);
-            $table->dropColumn('requester_id');
-            $table->unsignedBigInteger('karyawan_id')->after('id');
-            $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
-            $table->index(['karyawan_id']);
-        });
+        if (Schema::hasTable('pengajuan_barangs')) {
+            Schema::table('pengajuan_barangs', function (Blueprint $table) {
+                // Only proceed if requester_id exists
+                if (Schema::hasColumn('pengajuan_barangs', 'requester_id')) {
+                    try {
+                        $table->dropForeign(['requester_id']);
+                    } catch (\Exception $e) {
+                        // Foreign key doesn't exist, continue
+                    }
+                    $table->dropColumn('requester_id');
+                }
+                
+                // Only add karyawan_id if it doesn't exist
+                if (!Schema::hasColumn('pengajuan_barangs', 'karyawan_id')) {
+                    $table->unsignedBigInteger('karyawan_id')->after('id');
+                    $table->foreign('karyawan_id')->references('id')->on('karyawans')->onDelete('cascade');
+                    $table->index(['karyawan_id']);
+                }
+            });
+        }
     }
 
     /**
@@ -114,6 +96,29 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Helper function to safely reverse foreign key relationships
+        $revertForeignKey = function($tableName) {
+            if (Schema::hasTable($tableName) && Schema::hasColumn($tableName, 'karyawan_id')) {
+                Schema::table($tableName, function (Blueprint $table) {
+                    try {
+                        $table->dropForeign(['karyawan_id']);
+                    } catch (\Exception $e) {
+                        // Foreign key doesn't exist, continue
+                    }
+                    
+                    try {
+                        $table->dropIndex(['karyawan_id']);
+                    } catch (\Exception $e) {
+                        // Index doesn't exist, continue
+                    }
+                    
+                    // Re-add foreign key pointing to users table
+                    $table->foreign('karyawan_id')->references('id')->on('users')->onDelete('cascade');
+                    $table->index(['karyawan_id']);
+                });
+            }
+        };
+
         // Reverse all changes
         $tables = [
             'absensis', 'cutis', 'k_p_i_s', 'pembinaans', 'hutang_karyawans',
@@ -122,21 +127,34 @@ return new class extends Migration
         ];
 
         foreach ($tables as $table) {
-            Schema::table($table, function (Blueprint $blueprint) use ($table) {
-                $blueprint->dropForeign(['karyawan_id']);
-                $blueprint->dropIndex(['karyawan_id']);
-                $blueprint->foreign('karyawan_id')->references('id')->on('users')->onDelete('cascade');
-                $blueprint->index(['karyawan_id']);
-            });
+            $revertForeignKey($table);
         }
 
         // Revert pengajuan_barangs table
-        Schema::table('pengajuan_barangs', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-            $table->dropColumn('karyawan_id');
-            $table->unsignedBigInteger('requester_id')->after('id');
-            $table->foreign('requester_id')->references('id')->on('users')->onDelete('cascade');
-            $table->index(['requester_id']);
-        });
+        if (Schema::hasTable('pengajuan_barangs')) {
+            Schema::table('pengajuan_barangs', function (Blueprint $table) {
+                if (Schema::hasColumn('pengajuan_barangs', 'karyawan_id')) {
+                    try {
+                        $table->dropForeign(['karyawan_id']);
+                    } catch (\Exception $e) {
+                        // Foreign key doesn't exist, continue
+                    }
+                    
+                    try {
+                        $table->dropIndex(['karyawan_id']);
+                    } catch (\Exception $e) {
+                        // Index doesn't exist, continue
+                    }
+                    
+                    $table->dropColumn('karyawan_id');
+                }
+                
+                if (!Schema::hasColumn('pengajuan_barangs', 'requester_id')) {
+                    $table->unsignedBigInteger('requester_id')->after('id');
+                    $table->foreign('requester_id')->references('id')->on('users')->onDelete('cascade');
+                    $table->index(['requester_id']);
+                }
+            });
+        }
     }
 };

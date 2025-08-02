@@ -11,9 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Only create if users table exists
+        if (!Schema::hasTable('users')) {
+            throw new \Exception('Users table must exist before creating notifications table. Please run users migration first.');
+        }
+
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
             $table->string('type')->index();
             $table->string('title');
             $table->text('message');
@@ -30,6 +35,11 @@ return new class extends Migration
             $table->index(['user_id', 'created_at']);
             $table->index(['type', 'created_at']);
         });
+
+        // Add foreign key constraint after table creation
+        Schema::table('notifications', function (Blueprint $table) {
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+        });
     }
 
     /**
@@ -37,6 +47,17 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Drop foreign key first if table exists
+        if (Schema::hasTable('notifications')) {
+            Schema::table('notifications', function (Blueprint $table) {
+                try {
+                    $table->dropForeign(['user_id']);
+                } catch (\Exception $e) {
+                    // Foreign key doesn't exist, continue
+                }
+            });
+        }
+
         Schema::dropIfExists('notifications');
     }
 };
