@@ -98,15 +98,17 @@ Route::prefix('keuangan/auth')->name('keuangan.')->group(function () {
     Route::post('login', [LoginController::class, 'login'])->name('login');
 });
 
-// Notification Routes (requires authentication)
+// Notification Routes (requires authentication for regular users)
 Route::middleware('auth')->group(function () {
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
 });
 
-Route::prefix('karyawan/auth')->name('karyawan.')->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('showLoginForm');
-    Route::post('login', [LoginController::class, 'login'])->name('login');
+// Notification Routes for Karyawan (separate authentication)
+Route::middleware('auth:karyawan')->prefix('karyawan')->name('karyawan.')->group(function () {
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
 });
+
+// Note: Karyawan authentication routes are handled in the main karyawan routes group below
 
 Route::prefix('logistik/auth')->name('logistik.')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('showLoginForm');
@@ -300,9 +302,10 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::Keuangan->value])->prefix('
 
 // Karyawan Authentication Routes
 Route::prefix('karyawan')->name('karyawan.')->group(function () {
+    // Guest routes (for login)
     Route::middleware('guest:karyawan')->group(function () {
         Route::get('/login', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'login']);
+        Route::post('/login', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'login'])->name('authenticate');
     });
     
     Route::middleware('auth:karyawan')->group(function () {
@@ -400,6 +403,10 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::Logistik->value])->prefix('
     
     // Vendor Management
     Route::resource('vendor', App\Http\Controllers\Logistik\VendorController::class);
+    Route::post('/vendor/{vendor}/update-status', [App\Http\Controllers\Logistik\VendorController::class, 'updateStatus'])->name('vendor.update-status');
+    Route::post('/vendor/{vendor}/update-rating', [App\Http\Controllers\Logistik\VendorController::class, 'updateRating'])->name('vendor.update-rating');
+    Route::post('/vendor/{id}/restore', [App\Http\Controllers\Logistik\VendorController::class, 'restore'])->name('vendor.restore');
+    Route::delete('/vendor/{id}/force-delete', [App\Http\Controllers\Logistik\VendorController::class, 'forceDelete'])->name('vendor.force-delete');
 });
 
 // Pelamar Routes
