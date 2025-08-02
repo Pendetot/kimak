@@ -10,15 +10,15 @@
         </div>
         <div class="navbar-content">
             <ul class="pc-navbar">
-                @if(Auth::check())
+                @if(Auth::guard('karyawan')->check())
+                    @include('karyawan.layouts.sidebar')
+                @elseif(Auth::check())
                     @if(Auth::user()->hasRole(\App\Enums\RoleEnum::SuperAdmin))
                         @include('superadmin.layouts.sidebar')
                     @elseif(Auth::user()->hasRole(\App\Enums\RoleEnum::HRD))
                         @include('hrd.layouts.sidebar')
                     @elseif(Auth::user()->hasRole(\App\Enums\RoleEnum::Keuangan))
                         @include('keuangan.layouts.sidebar')
-                    @elseif(Auth::user()->hasRole(\App\Enums\RoleEnum::Karyawan))
-                        @include('karyawan.layouts.sidebar')
                     @elseif(Auth::user()->hasRole(\App\Enums\RoleEnum::Logistik))
                         @include('logistik.layouts.sidebar')
                     @elseif(Auth::user()->hasRole(\App\Enums\RoleEnum::Pelamar))

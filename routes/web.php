@@ -76,7 +76,10 @@ Route::prefix('keuangan/auth')->name('keuangan.')->group(function () {
     Route::post('login', [LoginController::class, 'login'])->name('login');
 });
 
-
+// Notification Routes (requires authentication)
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+});
 
 Route::prefix('karyawan/auth')->name('karyawan.')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('showLoginForm');
@@ -122,6 +125,17 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::SuperAdmin->value])->prefix
         Route::post('{pengajuanBarang}/approve', [App\Http\Controllers\SuperAdmin\PengajuanBarangApprovalController::class, 'approve'])->name('approve');
         Route::post('{pengajuanBarang}/reject', [App\Http\Controllers\SuperAdmin\PengajuanBarangApprovalController::class, 'reject'])->name('reject');
     });
+
+    // HRD Pengajuan Barang Routes for SuperAdmin - Final Approval
+    Route::prefix('pengajuan-barang-hrd')->name('pengajuan-barang-hrd.')->group(function () {
+        Route::get('/', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'index'])->name('index');
+        Route::get('/{pengajuanBarang}', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'show'])->name('show');
+        Route::get('/{pengajuanBarang}/approval/{action}', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'showApprovalForm'])->name('approval-form');
+        Route::post('/{pengajuanBarang}/approve', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'approve'])->name('approve');
+        Route::post('/{pengajuanBarang}/reject', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'reject'])->name('reject');
+        Route::post('/bulk-approve', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'bulkApprove'])->name('bulk-approve');
+        Route::get('/export-report', [App\Http\Controllers\SuperAdmin\PengajuanBarangHRDController::class, 'exportReport'])->name('export-report');
+    });
     Route::get('/administrasi-pelamar', [App\Http\Controllers\HRD\PelamarController::class, 'index'])->name('administrasi-pelamar.index');
     Route::get('/interview-attendance', [App\Http\Controllers\HRD\InterviewAttendanceController::class, 'index'])->name('interview-attendance.index');
 
@@ -142,9 +156,10 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::HRD->value])->prefix('hrd')
 
     Route::get('/kpi-penilaian', [App\Http\Controllers\HRD\KpiPenilaianController::class, 'index'])->name('kpi-penilaian.index');
 
-    // Pengajuan Barang Routes for HRD - TEMPORARILY DISABLED
-        Route::get('/pengajuan-barang/create', [App\Http\Controllers\HRD\HrdPengajuanBarangController::class, 'create'])->name('pengajuan-barang.create');
-    Route::post('/pengajuan-barang', [App\Http\Controllers\HRD\HrdPengajuanBarangController::class, 'store'])->name('pengajuan-barang.store');
+    // Pengajuan Barang Routes for HRD (New Employee Procurement)
+    Route::resource('pengajuan-barang', App\Http\Controllers\HRD\PengajuanBarangController::class);
+    Route::get('/pengajuan-barang/{pengajuanBarang}/duplicate', [App\Http\Controllers\HRD\PengajuanBarangController::class, 'duplicate'])->name('pengajuan-barang.duplicate');
+    Route::post('/pengajuan-barang/{pengajuanBarang}/duplicate', [App\Http\Controllers\HRD\PengajuanBarangController::class, 'storeDuplicate'])->name('pengajuan-barang.store-duplicate');
 
     Route::resource('karyawans', KaryawanController::class)->names([
         'index' => 'data-karyawan',
@@ -251,43 +266,76 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::HRD->value])->prefix('hrd')
 
 // Keuangan Routes
 Route::middleware(['auth', 'check.role:' . RoleEnum::Keuangan->value])->prefix('keuangan')->name('keuangan.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('keuangan.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\Keuangan\KeuanganController::class, 'index'])->name('dashboard');
     Route::resource('hutang-karyawans', HutangKaryawanController::class);
     Route::resource('rekening-karyawans', RekeningKaryawanController::class);
-    Route::get('/penalti-sp', [App\Http\Controllers\Keuangan\KeuanganController::class, 'indexPenalti'])->name('penalti-sp.index');
+    Route::get('/penalti-sp', [App\Http\Controllers\Keuangan\PenaltiSPController::class, 'index'])->name('penalti-sp.index');
+    Route::get('/penalti-sp/{penaltiSP}', [App\Http\Controllers\Keuangan\PenaltiSPController::class, 'show'])->name('penalti-sp.show');
     Route::resource('surat-peringatan', SuratPeringatanController::class)->only(['show', 'edit', 'update', 'destroy']);
     Route::get('/surat-peringatan/create', [SuratPeringatanController::class, 'create'])->name('surat-peringatan.create');
     Route::post('/surat-peringatan', [SuratPeringatanController::class, 'store'])->name('surat-peringatan.store');
 });
 
-// Karyawan Routes
-Route::middleware(['auth', 'check.role:' . RoleEnum::Karyawan->value])->prefix('karyawan')->name('karyawan.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('karyawan.dashboard');
-    })->name('dashboard');
-    Route::resource('kpis', App\Http\Controllers\Karyawan\KPIKaryawanController::class)->names([
-        'index' => 'kpis',
-        'create' => 'kpis.create',
-        'store' => 'kpis.store',
-        'show' => 'kpis.show',
-        'edit' => 'kpis.edit',
-        'update' => 'kpis.update',
-        'destroy' => 'kpis.destroy',
-    ]);
-    Route::resource('absensis', App\Http\Controllers\Karyawan\AbsensiController::class)->names([
-        'index' => 'absensis',
-        'create' => 'absensis.create',
-        'store' => 'absensis.store',
-        'show' => 'absensis.show',
-        'edit' => 'absensis.edit',
-        'update' => 'absensis.update',
-        'destroy' => 'absensis.destroy',
-    ]);
-    Route::resource('lap-dokumens', App\Http\Controllers\Karyawan\LapDokumenController::class)->names([
-        'index' => 'lap-dokumens',
-        'create' => 'lap-dokumens.create',
+// Karyawan Authentication Routes
+Route::prefix('karyawan')->name('karyawan.')->group(function () {
+    Route::middleware('guest:karyawan')->group(function () {
+        Route::get('/login', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'login']);
+    });
+    
+    Route::middleware('auth:karyawan')->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [App\Http\Controllers\Karyawan\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/widget-data', [App\Http\Controllers\Karyawan\DashboardController::class, 'widgetData'])->name('dashboard.widget-data');
+        
+        // Authentication & Profile
+        Route::post('/logout', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'logout'])->name('logout');
+        Route::get('/profile', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'showProfile'])->name('profile.show');
+        Route::put('/profile', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/change-password', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'showChangePasswordForm'])->name('password.change');
+        Route::put('/change-password', [App\Http\Controllers\Karyawan\Auth\KaryawanAuthController::class, 'changePassword'])->name('password.update');
+        
+        // Absensi Management
+        Route::prefix('absensi')->name('absensi.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Karyawan\AbsensiController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\Karyawan\AbsensiController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\Karyawan\AbsensiController::class, 'store'])->name('store');
+            Route::get('/{absensi}', [App\Http\Controllers\Karyawan\AbsensiController::class, 'show'])->name('show');
+            Route::get('/{absensi}/edit', [App\Http\Controllers\Karyawan\AbsensiController::class, 'edit'])->name('edit');
+            Route::put('/{absensi}', [App\Http\Controllers\Karyawan\AbsensiController::class, 'update'])->name('update');
+            Route::post('/check-in', [App\Http\Controllers\Karyawan\AbsensiController::class, 'checkIn'])->name('check-in');
+            Route::post('/check-out', [App\Http\Controllers\Karyawan\AbsensiController::class, 'checkOut'])->name('check-out');
+            Route::get('/statistics', [App\Http\Controllers\Karyawan\AbsensiController::class, 'statistics'])->name('statistics');
+        });
+        
+        // KPI Management
+        Route::prefix('kpi')->name('kpi.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Karyawan\KPIController::class, 'index'])->name('index');
+            Route::get('/{kpi}', [App\Http\Controllers\Karyawan\KPIController::class, 'show'])->name('show');
+            Route::get('/statistics', [App\Http\Controllers\Karyawan\KPIController::class, 'statistics'])->name('statistics');
+            Route::get('/history', [App\Http\Controllers\Karyawan\KPIController::class, 'history'])->name('history');
+            Route::get('/current-summary', [App\Http\Controllers\Karyawan\KPIController::class, 'currentSummary'])->name('current-summary');
+            Route::get('/ranking', [App\Http\Controllers\Karyawan\KPIController::class, 'ranking'])->name('ranking');
+            Route::get('/suggestions', [App\Http\Controllers\Karyawan\KPIController::class, 'suggestions'])->name('suggestions');
+        });
+        
+        // Cuti Management
+        Route::resource('cuti', App\Http\Controllers\Karyawan\CutiController::class)->except(['destroy']);
+        Route::patch('cuti/{cuti}/cancel', [App\Http\Controllers\Karyawan\CutiController::class, 'cancel'])->name('cuti.cancel');
+        
+        // Pengajuan Barang
+        Route::resource('pengajuan-barang', App\Http\Controllers\Karyawan\PengajuanBarangController::class)->except(['destroy']);
+        Route::patch('pengajuan-barang/{pengajuanBarang}/cancel', [App\Http\Controllers\Karyawan\PengajuanBarangController::class, 'cancel'])->name('pengajuan-barang.cancel');
+        Route::patch('pengajuan-barang/{pengajuanBarang}/confirm-receipt', [App\Http\Controllers\Karyawan\PengajuanBarangController::class, 'confirmReceipt'])->name('pengajuan-barang.confirm-receipt');
+        
+        // Dokumen Management
+        Route::resource('dokumen', App\Http\Controllers\Karyawan\LapDokumenController::class)->names([
+            'index' => 'dokumen.index',
+            'create' => 'dokumen.create',
+            'store' => 'dokumen.store',
+            'show' => 'dokumen.show',
+            'edit' => 'dokumen.edit',
+            'update' => 'dokumen.update',
         'store' => 'lap-dokumens.store',
         'show' => 'lap-dokumens.show',
         'edit' => 'lap-dokumens.edit',
@@ -305,13 +353,32 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::Karyawan->value])->prefix('
     ]);
 });
 
-// Guard Routes
+// Logistik Routes
 Route::middleware(['auth', 'check.role:' . RoleEnum::Logistik->value])->prefix('logistik')->name('logistik.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('logistik.dashboard');
-    })->name('dashboard');
-    // Pengajuan Barang Routes for Logistic
+    Route::get('/dashboard', [App\Http\Controllers\Logistik\LogistikController::class, 'index'])->name('dashboard');
+    
+    // Pengajuan Barang Routes for Logistic (existing karyawan requests)
     Route::resource('pengajuan-barang', App\Http\Controllers\Logistik\PengajuanBarangController::class);
+    
+    // HRD Pengajuan Barang Routes for Logistic (new employee procurement)
+    Route::prefix('pengajuan-barang-hrd')->name('pengajuan-barang-hrd.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'index'])->name('index');
+        Route::get('/{pengajuanBarang}', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'show'])->name('show');
+        Route::get('/{pengajuanBarang}/approval/{action}', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'showApprovalForm'])->name('approval-form');
+        Route::post('/{pengajuanBarang}/approve', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'approve'])->name('approve');
+        Route::post('/{pengajuanBarang}/reject', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'reject'])->name('reject');
+        Route::get('/{pengajuanBarang}/complete-form', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'showCompletionForm'])->name('completion-form');
+        Route::post('/{pengajuanBarang}/complete', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'complete'])->name('complete');
+        Route::post('/bulk-approve', [App\Http\Controllers\Logistik\PengajuanBarangHRDController::class, 'bulkApprove'])->name('bulk-approve');
+    });
+    
+    // Pembelian Management
+    Route::resource('pembelian', App\Http\Controllers\Logistik\PembelianController::class);
+    Route::post('/pembelian/{pembelian}/process', [App\Http\Controllers\Logistik\PembelianController::class, 'process'])->name('pembelian.process');
+    Route::post('/pembelian/{pembelian}/complete', [App\Http\Controllers\Logistik\PembelianController::class, 'complete'])->name('pembelian.complete');
+    
+    // Vendor Management
+    Route::resource('vendor', App\Http\Controllers\Logistik\VendorController::class);
 });
 
 // Pelamar Routes
