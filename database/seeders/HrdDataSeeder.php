@@ -32,23 +32,29 @@ class HrdDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create some users for HRD related models
+        // Create some users for HRD related models (needed for Pelamar)
         $users = User::factory()->count(10)->create();
 
-        // Create Pelamar data
+        // Create Karyawan data first (independent authentication system)
+        $karyawans = Karyawan::factory()->count(10)->create();
+
+        // Create Pelamar data (uses user_id from users)
         Pelamar::factory()->count(20)->create();
 
-        // Create Karyawan data (assuming some users are employees)
-        Karyawan::factory()->count(10)->create();
+        // Create KPI data (needs existing karyawans)
+        if ($karyawans->count() > 0) {
+            KPI::factory()->count(10)->create();
+        }
 
-        // Create KPI data
-        KPI::factory()->count(10)->create();
+        // Create Absensi data (needs existing karyawans)
+        if ($karyawans->count() > 0) {
+            Absensi::factory()->count(50)->create();
+        }
 
-        // Create Absensi data
-        Absensi::factory()->count(50)->create();
-
-        // Create Cuti data
-        Cuti::factory()->count(15)->create();
+        // Create Cuti data (needs existing karyawans)
+        if ($karyawans->count() > 0) {
+            Cuti::factory()->count(15)->create();
+        }
 
         // Create HealthTestResult data
         HealthTestResult::factory()->count(10)->create();
