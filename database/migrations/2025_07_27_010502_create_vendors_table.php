@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Check dependencies
+        if (!Schema::hasTable('users')) {
+            throw new \Exception('Users table must exist before creating vendors table.');
+        }
+
         Schema::create('vendors', function (Blueprint $table) {
             $table->id();
             
@@ -49,7 +54,7 @@ return new class extends Migration
             $table->text('catatan')->nullable();
             
             // Audit Trail
-            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
+            $table->unsignedBigInteger('created_by');
             
             $table->softDeletes();
             $table->timestamps();
@@ -60,6 +65,11 @@ return new class extends Migration
             $table->index(['rating', 'status']);
             $table->index('nama_vendor');
         });
+
+        // Add foreign key constraint after table creation
+        Schema::table('vendors', function (Blueprint $table) {
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
+        });
     }
 
     /**
@@ -67,6 +77,17 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Drop foreign key first if table exists
+        if (Schema::hasTable('vendors')) {
+            Schema::table('vendors', function (Blueprint $table) {
+                try {
+                    $table->dropForeign(['created_by']);
+                } catch (\Exception $e) {
+                    // Foreign key doesn't exist, continue
+                }
+            });
+        }
+
         Schema::dropIfExists('vendors');
     }
 };
