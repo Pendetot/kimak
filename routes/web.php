@@ -255,6 +255,7 @@ Route::middleware(['auth', 'check.role:' . RoleEnum::Keuangan->value])->prefix('
     Route::resource('hutang-karyawans', HutangKaryawanController::class);
     Route::resource('rekening-karyawans', RekeningKaryawanController::class);
     Route::get('/penalti-sp', [App\Http\Controllers\Keuangan\PenaltiSPController::class, 'index'])->name('penalti-sp.index');
+    Route::get('/penalti-sp/{penaltiSP}', [App\Http\Controllers\Keuangan\PenaltiSPController::class, 'show'])->name('penalti-sp.show');
     Route::resource('surat-peringatan', SuratPeringatanController::class)->only(['show', 'edit', 'update', 'destroy']);
     Route::get('/surat-peringatan/create', [SuratPeringatanController::class, 'create'])->name('surat-peringatan.create');
     Route::post('/surat-peringatan', [SuratPeringatanController::class, 'store'])->name('surat-peringatan.store');
@@ -305,9 +306,12 @@ Route::prefix('karyawan')->name('karyawan.')->group(function () {
         
         // Cuti Management
         Route::resource('cuti', App\Http\Controllers\Karyawan\CutiController::class)->except(['destroy']);
+        Route::patch('cuti/{cuti}/cancel', [App\Http\Controllers\Karyawan\CutiController::class, 'cancel'])->name('cuti.cancel');
         
         // Pengajuan Barang
         Route::resource('pengajuan-barang', App\Http\Controllers\Karyawan\PengajuanBarangController::class)->except(['destroy']);
+        Route::patch('pengajuan-barang/{pengajuanBarang}/cancel', [App\Http\Controllers\Karyawan\PengajuanBarangController::class, 'cancel'])->name('pengajuan-barang.cancel');
+        Route::patch('pengajuan-barang/{pengajuanBarang}/confirm-receipt', [App\Http\Controllers\Karyawan\PengajuanBarangController::class, 'confirmReceipt'])->name('pengajuan-barang.confirm-receipt');
         
         // Dokumen Management
         Route::resource('dokumen', App\Http\Controllers\Karyawan\LapDokumenController::class)->names([
