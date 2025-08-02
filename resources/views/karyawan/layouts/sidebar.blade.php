@@ -32,33 +32,41 @@
 </li>
 
 <li class="pc-item pc-caption">
-    <label data-i18n="Pengajuan">Pengajuan</label>
+    <label data-i18n="Pengajuan & Permintaan">Pengajuan & Permintaan</label>
 </li>
 <li class="pc-item">
     <a href="{{ route('karyawan.cuti.index') }}" class="pc-link">
         <span class="pc-micon">
             <i class="ph-duotone ph-calendar-blank"></i>
         </span>
-        <span class="pc-mtext" data-i18n="Cuti">Cuti</span>
+        <span class="pc-mtext" data-i18n="Cuti">Pengajuan Cuti</span>
     </a>
 </li>
 <li class="pc-item">
     <a href="{{ route('karyawan.pengajuan-barang.index') }}" class="pc-link">
         <span class="pc-micon">
-            <i class="ph-duotone ph-package"></i>
+            <i class="ph-duotone ph-shopping-cart"></i>
         </span>
-        <span class="pc-mtext" data-i18n="Pengajuan Barang">Pengajuan Barang</span>
+        <span class="pc-mtext" data-i18n="Permintaan Barang">Permintaan Barang</span>
     </a>
 </li>
 
 <li class="pc-item pc-caption">
-    <label data-i18n="Dokumen">Dokumen</label>
+    <label data-i18n="Personal">Personal</label>
+</li>
+<li class="pc-item">
+    <a href="{{ route('karyawan.profile.show') }}" class="pc-link">
+        <span class="pc-micon">
+            <i class="ph-duotone ph-user-circle"></i>
+        </span>
+        <span class="pc-mtext" data-i18n="Profil">Profil Saya</span>
+    </a>
 </li>
 <li class="pc-item">
     <a href="{{ route('karyawan.dokumen.index') }}" class="pc-link">
         <span class="pc-micon">
             <i class="ph-duotone ph-file-text"></i>
         </span>
-        <span class="pc-mtext" data-i18n="Dokumen">Dokumen</span>
+        <span class="pc-mtext" data-i18n="Dokumen">Dokumen Saya</span>
     </a>
 </li>
