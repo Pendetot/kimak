@@ -39,13 +39,35 @@ use App\Http\Controllers\Logistik\PengajuanBarangController;
 */
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Schema;
 
 Route::get('/', function () {
-    $is_form_enabled = Setting::where('key', 'is_form_enabled')->first();
-    $is_form_enabled = $is_form_enabled ? ($is_form_enabled->value === 'true') : false;
-    $website_footer_description = Setting::where('key', 'website_footer_description')->firstOrNew();
-    $website_logo = Setting::where('key', 'website_logo')->firstOrNew();
-    $website_made_by_text = Setting::where('key', 'website_made_by_text')->firstOrNew();
+    try {
+        // Check if settings table exists and is accessible
+        if (Schema::hasTable('settings')) {
+            $is_form_enabled = Setting::where('key', 'is_form_enabled')->first();
+            $is_form_enabled = $is_form_enabled ? ($is_form_enabled->value === 'true') : false;
+            $website_footer_description = Setting::where('key', 'website_footer_description')->firstOrNew();
+            $website_logo = Setting::where('key', 'website_logo')->firstOrNew();
+            $website_made_by_text = Setting::where('key', 'website_made_by_text')->firstOrNew();
+        } else {
+            // Default values when settings table doesn't exist
+            $is_form_enabled = true; // Default to enabled
+            $website_footer_description = (object)['value' => 'Default footer description'];
+            $website_logo = (object)['value' => 'Default logo'];
+            $website_made_by_text = (object)['value' => 'Made with ❤️'];
+        }
+    } catch (\Exception $e) {
+        // Fallback values in case of any database error
+        $is_form_enabled = true;
+        $website_footer_description = (object)['value' => 'Default footer description'];
+        $website_logo = (object)['value' => 'Default logo'];
+        $website_made_by_text = (object)['value' => 'Made with ❤️'];
+        
+        // Log the error for debugging
+        \Log::warning('Settings table access failed in welcome route: ' . $e->getMessage());
+    }
+    
     return view('welcome', compact('is_form_enabled', 'website_footer_description', 'website_logo', 'website_made_by_text'));
 });
 
