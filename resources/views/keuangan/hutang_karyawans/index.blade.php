@@ -4,6 +4,70 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-md-3 col-sm-6">
+            <div class="card bg-primary-dark">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h4 class="text-white">{{ $stats['total_hutang'] }}</h4>
+                            <h6 class="text-white m-b-0">Total Hutang</h6>
+                        </div>
+                        <div class="col-4 text-right">
+                            <i class="ph-duotone ph-currency-circle-dollar f-28 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card bg-success-dark">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h4 class="text-white">Rp {{ number_format($stats['total_jumlah'], 0, ',', '.') }}</h4>
+                            <h6 class="text-white m-b-0">Total Nilai</h6>
+                        </div>
+                        <div class="col-4 text-right">
+                            <i class="ph-duotone ph-money f-28 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card bg-warning-dark">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h4 class="text-white">{{ $stats['hutang_belum_lunas'] }}</h4>
+                            <h6 class="text-white m-b-0">Belum Lunas</h6>
+                        </div>
+                        <div class="col-4 text-right">
+                            <i class="ph-duotone ph-clock f-28 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card bg-info-dark">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h4 class="text-white">{{ $stats['hutang_lunas'] }}</h4>
+                            <h6 class="text-white m-b-0">Lunas</h6>
+                        </div>
+                        <div class="col-4 text-right">
+                            <i class="ph-duotone ph-check-circle f-28 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="row">
         <div class="col-md-12 col-xl-12">
             <div class="card table-card">
@@ -39,8 +103,8 @@
                             <tbody>
                                 @foreach ($hutangKaryawans as $hutang)
                                     <tr>
-                                        <td>{{ $hutang->karyawan ? $hutang->karyawan->nama : 'N/A' }}</td>
-                                        <td>Rp {{ number_format($hutang->amount, 0, ',', '.') }}</td>
+                                        <td>{{ $hutang->karyawan ? $hutang->karyawan->nama_lengkap : 'N/A' }}</td>
+                                        <td>Rp {{ number_format($hutang->jumlah, 0, ',', '.') }}</td>
                                         <td>{{ $hutang->alasan }}</td>
                                         <td>{{ str_replace('_', ' ', ucfirst($hutang->status->value)) }}</td>
                                         <td>

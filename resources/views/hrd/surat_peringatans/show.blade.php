@@ -16,7 +16,7 @@
                       <div class="row">
                         <div class="col-md-6">
                           <p class="mb-1 text-muted">Nama Karyawan</p>
-                          <p class="mb-0">{{ $suratPeringatan->karyawan ? $suratPeringatan->karyawan->nama : 'N/A' }}</p>
+                          <p class="mb-0">{{ $suratPeringatan->karyawan ? $suratPeringatan->karyawan->nama_lengkap : 'N/A' }}</p>
                         </div>
                         <div class="col-md-6">
                           <p class="mb-1 text-muted">Jenis SP</p>
@@ -51,7 +51,8 @@
                   </ul>
                 </div>
                 <div class="card-footer text-end">
-                    <a href="{{ route('hrd.surat-peringatan') }}" class="btn btn-light">Kembali</a>
+                    <a href="{{ route('hrd.surat-peringatans.edit', $suratPeringatan->id) }}" class="btn btn-warning me-2">Edit</a>
+                    <a href="{{ route('hrd.surat-peringatans.index') }}" class="btn btn-light">Kembali</a>
                 </div>
             </div>
         </div>

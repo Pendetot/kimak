@@ -65,7 +65,15 @@ class SuratPeringatanController extends Controller
     public function show(SuratPeringatan $suratPeringatan)
     {
         $suratPeringatan->load('karyawan');
-        return view('hrd.surat_peringatans.show', compact('suratPeringatan'));
+        
+        // Get penalty months and history
+        $penaltyMonths = $suratPeringatan->penalty_months ?? 1;
+        $historySuratPeringatan = SuratPeringatan::where('karyawan_id', $suratPeringatan->karyawan_id)
+                                                ->where('id', '!=', $suratPeringatan->id)
+                                                ->orderBy('tanggal_sp', 'desc')
+                                                ->get();
+        
+        return view('hrd.surat_peringatans.show', compact('suratPeringatan', 'penaltyMonths', 'historySuratPeringatan'));
     }
 
     /**

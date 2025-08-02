@@ -28,7 +28,7 @@
                     <td>
                       <div class="d-inline-block align-middle">
                         <div class="d-inline-block">
-                          <h6 class="m-b-0">{{ $sp->karyawan ? $sp->karyawan->nama : 'N/A' }}</h6>
+                          <h6 class="m-b-0">{{ $sp->karyawan ? $sp->karyawan->nama_lengkap : 'N/A' }}</h6>
                           <p class="m-b-0">{{ $sp->tanggal_sp->format('d M Y') }}</p>
                         </div>
                       </div>

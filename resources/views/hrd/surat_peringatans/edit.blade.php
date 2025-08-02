@@ -19,7 +19,7 @@
                             <select name="karyawan_id" id="karyawan_id" class="form-control @error('karyawan_id') is-invalid @enderror">
                                 <option value="">Pilih Karyawan</option>
                                 @foreach ($karyawans as $karyawan)
-                                    <option value="{{ $karyawan->id }}" {{ old('karyawan_id', $suratPeringatan->karyawan_id) == $karyawan->id ? 'selected' : '' }}>{{ $karyawan->nama }}</option>
+                                    <option value="{{ $karyawan->id }}" {{ old('karyawan_id', $suratPeringatan->karyawan_id) == $karyawan->id ? 'selected' : '' }}>{{ $karyawan->nama_lengkap }}</option>
                                 @endforeach
                             </select>
                             @error('karyawan_id')

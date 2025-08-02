@@ -17,7 +17,16 @@ class HutangKaryawanController extends Controller
     public function index()
     {
         $hutangKaryawans = HutangKaryawan::with('karyawan')->get();
-        return view('keuangan.hutang_karyawans.index', compact('hutangKaryawans'));
+        
+        // Statistics for widgets
+        $stats = [
+            'total_hutang' => $hutangKaryawans->count(),
+            'total_jumlah' => $hutangKaryawans->sum('jumlah'),
+            'hutang_belum_lunas' => $hutangKaryawans->where('status', 'belum_lunas')->count(),
+            'hutang_lunas' => $hutangKaryawans->where('status', 'lunas')->count(),
+        ];
+        
+        return view('keuangan.hutang_karyawans.index', compact('hutangKaryawans', 'stats'));
     }
 
     /**

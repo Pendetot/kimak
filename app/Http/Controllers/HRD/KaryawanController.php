@@ -125,7 +125,15 @@ class KaryawanController extends Controller
      */
     public function edit(Karyawan $karyawan)
     {
-        return view('hrd.karyawans.edit', compact('karyawan'));
+        $jabatanList = [
+            'Manager' => 'Manager',
+            'Supervisor' => 'Supervisor', 
+            'Staff' => 'Staff',
+            'Operator' => 'Operator',
+            'Intern' => 'Intern'
+        ];
+        
+        return view('hrd.karyawans.edit', compact('karyawan', 'jabatanList'));
     }
 
     /**
